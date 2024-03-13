@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Link;
+use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -16,8 +17,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Link::create([
-            'name' => 'tes links',
-            'description' => 'ujian 2022/2023'
+            'link_name' => 'https://docs.google.com/forms/d/e/1FAIpQLSfgXFzWuOo9sWAx3v4LfnNZWnTTLx6jwnmGnx4_qiOE75lV1w/viewform',
+            'link_title' => 'ujian 2022/2023',
+            'link_status' => 'active'
         ]);
         User::create([
             'name' => 'admin',
@@ -41,6 +43,21 @@ class DatabaseSeeder extends Seeder
             'role' => 'siswa',
             'password' => 'siswa123',
             'kelas_jurusan' => '11 RPL'
+        ]);
+        Progress::create([
+            'user_id' => 2,
+            'link_id' => 1,
+            'status_progress' => 'dikerjakan'
+        ]);
+        Progress::create([
+            'user_id' => 3,
+            'link_id' => 1,
+            'status_progress' => 'selesai'
+        ]);
+        Progress::create([
+            'user_id' => 4,
+            'link_id' => 1,
+            'status_progress' => 'belum dikerjakan'
         ]);
     }
 }

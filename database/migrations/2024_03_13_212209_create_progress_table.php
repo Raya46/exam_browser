@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('progress', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('role', ['admin', 'siswa']);
-            $table->string('password');
-            $table->string('kelas_jurusan')->nullable();
-            $table->double('nilai')->nullable();
-            $table->rememberToken();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('link_id')->constrained()->onDelete('cascade');
+            $table->enum('status_progress', ['belum dikerjakan', 'dikerjakan', 'selesai']);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('progress');
     }
 };

@@ -9,7 +9,7 @@ class LinkController extends Controller
 {
     public function index()
     {
-        $links = Link::all();
+        $links = Link::latest()->take(10)->get();
 
         return response()->json([
             'data' => $links
@@ -19,8 +19,9 @@ class LinkController extends Controller
     public function store(Request $request)
     {
         Link::create([
-            'name' => $request->name,
-            'description' => $request->description,
+            'link_name' => $request->link_name,
+            'link_title' => $request->link_title,
+            'link_status' => 'active'
         ]);
 
         return response()->json([
@@ -52,8 +53,9 @@ class LinkController extends Controller
         $link = Link::find($id);
 
         $link->update([
-            'name' => $request->name,
-            'description' => $request->description,
+            'link_name' => $request->link_name,
+            'link_title' => $request->link_title,
+            'link_status' => $request->link_status
         ]);
 
         return response()->json([

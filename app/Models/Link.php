@@ -10,7 +10,13 @@ class Link extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description'
+        'link_name',
+        'link_title',
+        'link_status'
     ];
+
+    public function progress()
+    {
+        return $this->hasMany(Progress::class);
+    }
 }

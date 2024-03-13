@@ -10,6 +10,7 @@ class Link extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'description'
     ];
 }

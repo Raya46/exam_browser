@@ -15,4 +15,49 @@ class LinkController extends Controller
             'data' => $links
         ], 200);
     }
+
+    public function store(Request $request)
+    {
+        Link::create([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return response()->json([
+            'data' => 'berhasil'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $link = Link::find($id);
+
+        $link->delete();
+        return response()->json([
+            'data' => 'berhasil'
+        ]);
+    }
+
+    public function show($id)
+    {
+        $link = Link::find($id);
+
+        return response()->json([
+            'data' => $link
+        ]);
+    }
+
+    public function putLink(Request $request, $id)
+    {
+        $link = Link::find($id);
+
+        $link->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return response()->json([
+            'data' => 'berhasil'
+        ]);
+    }
 }

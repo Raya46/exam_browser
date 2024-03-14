@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -32,5 +33,22 @@ class UserController extends Controller
             'data' => $validate,
             'token' => $token
         ], 200);
+    }
+
+    public function logout(): JsonResponse
+    {
+        auth()->user()->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Logout success',
+        ], 200);
+    }
+
+    public function getUserLoggedIn(){
+        $user = Auth::user();
+
+        return response()->json([
+            'data' => $user
+        ]);
     }
 }

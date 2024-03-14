@@ -21,7 +21,12 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'password',
+        'remember_token',
+        'password'
+    ];
+
+    protected $casts = [
+        'password' => 'hashed',
     ];
 
     public function progress()

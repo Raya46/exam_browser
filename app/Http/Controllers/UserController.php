@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,10 +46,10 @@ class UserController extends Controller
     }
 
     public function getUserLoggedIn(){
-        $user = Auth::user();
+        $data = Progress::with('user', 'link')->where('user_id', Auth::user()->id)->get();
 
         return response()->json([
-            'data' => $user
+            'data' => $data
         ]);
     }
 }

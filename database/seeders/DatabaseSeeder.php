@@ -30,19 +30,19 @@ class DatabaseSeeder extends Seeder
             'name' => 'siswa1',
             'role' => 'siswa',
             'password' => 'siswa123',
-            'kelas_jurusan' => '12 RPL'
+            'kelas_jurusan' => '12 RPL',
         ]);
         User::create([
             'name' => 'siswa2',
             'role' => 'siswa',
             'password' => 'siswa123',
-            'kelas_jurusan' => '12 AKL'
+            'kelas_jurusan' => '12 AKL',
         ]);
         User::create([
             'name' => 'siswa3',
             'role' => 'siswa',
             'password' => 'siswa123',
-            'kelas_jurusan' => '11 RPL'
+            'kelas_jurusan' => '11 RPL',
         ]);
         Progress::create([
             'user_id' => 2,

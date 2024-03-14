@@ -9,7 +9,7 @@ class LinkController extends Controller
 {
     public function index()
     {
-        $links = Link::latest()->take(10)->get();
+        $links = Link::with('progress')->latest()->take(10)->get();
 
         return response()->json([
             'data' => $links

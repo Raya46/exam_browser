@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
         Link::create([
             'link_name' => 'https://docs.google.com/forms/d/e/1FAIpQLSfgXFzWuOo9sWAx3v4LfnNZWnTTLx6jwnmGnx4_qiOE75lV1w/viewform',
             'link_title' => 'ujian 2022/2023',
-            'link_status' => 'active'
+            'link_status' => 'active',
+            'kelas_jurusan' => '12 RPL'
         ]);
         User::create([
             'name' => 'admin',

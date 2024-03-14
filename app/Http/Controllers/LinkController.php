@@ -21,7 +21,8 @@ class LinkController extends Controller
         Link::create([
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
-            'link_status' => 'active'
+            'link_status' => 'active',
+            'kelas_jurusan' => $request->kelas_jurusan
         ]);
 
         return response()->json([
@@ -55,7 +56,8 @@ class LinkController extends Controller
         $link->update([
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
-            'link_status' => $request->link_status
+            'link_status' => $request->link_status,
+            'kelas_jurusan' => $request->kelas_jurusan
         ]);
 
         return response()->json([

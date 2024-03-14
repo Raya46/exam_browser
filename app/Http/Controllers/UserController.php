@@ -45,8 +45,13 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getUserLoggedIn(){
-        $data = Progress::with('user', 'link')->where('user_id', Auth::user()->id)->get();
+    public function index()
+    {
+        $data = Progress::with('user', 'link')
+        ->where('user_id', Auth::user()->id)
+        ->latest()
+        ->take(10)
+        ->get();
 
         return response()->json([
             'data' => $data

@@ -8,7 +8,7 @@ Route::post('/login', [UserController::class, 'postLogin']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
-    Route::get('/get-user-loggedin', [UserController::class, 'getUserLoggedIn']);
+    Route::get('/data-user', [UserController::class, 'index']);
     Route::get('/links', [LinkController::class, 'index']);
     Route::get('/links/{id}', [LinkController::class, 'show']);
     Route::post('/links-post', [LinkController::class, 'store']);

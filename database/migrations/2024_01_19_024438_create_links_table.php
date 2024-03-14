@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->text('link_name');
             $table->string('link_title');
+            $table->string('kelas_jurusan');
             $table->enum('link_status', ['active', 'inactive']);
             $table->timestamps();
         });

@@ -12,7 +12,8 @@ class Link extends Model
     protected $fillable = [
         'link_name',
         'link_title',
-        'link_status'
+        'link_status',
+        'kelas_jurusan'
     ];
 
     public function progress()

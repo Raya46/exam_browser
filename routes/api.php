@@ -1,17 +1,45 @@
 <?php
 
 use App\Http\Controllers\LinkController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'postLogin']);
 
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
-    Route::get('/data-user', [UserController::class, 'index']);
     Route::get('/links', [LinkController::class, 'index']);
-    Route::get('/links/{id}', [LinkController::class, 'show']);
-    Route::post('/links-post', [LinkController::class, 'store']);
-    Route::delete('/links-delete/{id}', [LinkController::class, 'destroy']);
-    Route::put('/links-put/{id}', [LinkController::class, 'putLink']);
+    Route::prefix('links')->group(function (){
+        Route::get('/{id}', [LinkController::class, 'show']);
+        Route::post('/post', [LinkController::class, 'store']);
+        Route::delete('/{id}', [LinkController::class, 'destroy']);
+        Route::put('/{id}', [LinkController::class, 'putLink']);
+    });
+    Route::get('/super-admin', [UserController::class, 'indexSuperAdmin']);
+    Route::prefix('super-admin')->group(function (){
+        Route::get('/{id}', [UserController::class, 'showUser']);
+        Route::post('/post', [UserController::class, 'createAdminSekolah']);
+        Route::delete('/{id}', [UserController::class, 'deleteAdminSekolah']);
+        Route::put('/{id}', [UserController::class, 'updateAdminSekolah']);
+    });
+    Route::get('/admin-sekolah', [UserController::class, 'indexAdminSekolah']);
+    Route::prefix('admin-sekolah')->group(function (){
+        Route::get('/{id}', [UserController::class, 'showUser']);
+        Route::post('/post', [UserController::class, 'createSiswa']);
+        Route::delete('/{id}', [UserController::class, 'deleteSiswa']);
+        Route::put('/{id}', [UserController::class, 'updateSiswa']);
+    });
+    Route::get('/subscription', [SubscriptionController::class, 'index']);
+    Route::prefix('subscription')->group(function (){
+        Route::get('/{id}', [SubscriptionController::class, 'show']);
+        Route::post('/post', [SubscriptionController::class, 'store']);
+        Route::delete('/{id}', [SubscriptionController::class, 'destroy']);
+        Route::put('/{id}', [SubscriptionController::class, 'putSubscription']);
+    });
+    Route::get('/usersubs', [SubscriptionController::class, 'getUserSubs']);
+    Route::prefix('usersubs')->group(function (){
+        Route::post('/post', [SubscriptionController::class, 'postUserSubs']);
+    });
 });

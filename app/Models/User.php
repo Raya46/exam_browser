@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'kelas_jurusan',
         'nilai',
+        'subscription_id',
     ];
 
     protected $hidden = [
@@ -32,5 +33,9 @@ class User extends Authenticatable
     public function progress()
     {
         return $this->hasMany(Progress::class);
+    }
+
+    public function subslist(){
+        return $this->hasMany(SubsList::class);
     }
 }

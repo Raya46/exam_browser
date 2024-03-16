@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('role', ['super admin','admin sekolah', 'siswa']);
-            $table->string('password');
-            $table->string('kelas_jurusan')->nullable();
-            $table->double('nilai')->nullable();
-            $table->rememberToken();
+            $table->text('description');
+            $table->double('price');
+            $table->integer('invoice_period');
+            $table->enum('invoice_interval', ['month', 'year']);
+            $table->enum('currency', ['IDR', 'USD']);
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('subscriptions');
     }
 };

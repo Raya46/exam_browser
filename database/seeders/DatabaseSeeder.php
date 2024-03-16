@@ -6,6 +6,8 @@ namespace Database\Seeders;
 
 use App\Models\Link;
 use App\Models\Progress;
+use App\Models\Subscription;
+use App\Models\SubsList;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -22,10 +24,36 @@ class DatabaseSeeder extends Seeder
             'link_status' => 'active',
             'kelas_jurusan' => '12 RPL'
         ]);
+        Subscription::create([
+            'name' => '1 MONTH',
+            'description' => 'free 1 month',
+            'price' => 10000,
+            'invoice_period' => 1,
+            'invoice_interval' => 'month',
+            'currency' => 'IDR',
+        ]);
+        Subscription::create([
+            'name' => '1 YEAR',
+            'description' => 'free 1 year',
+            'price' => 100000,
+            'invoice_period' => 1,
+            'invoice_interval' => 'year',
+            'currency' => 'IDR',
+        ]);
         User::create([
-            'name' => 'admin',
-            'role' => 'admin',
-            'password' => 'admin123'
+            'name' => 'super admin',
+            'role' => 'super admin',
+            'password' => 'superadmin123'
+        ]);
+        User::create([
+            'name' => 'admin@sekolah1.com',
+            'role' => 'admin sekolah',
+            'password' => 'adminsekolah123',
+        ]);
+        User::create([
+            'name' => 'admin@sekolah2.com',
+            'role' => 'admin sekolah',
+            'password' => 'adminsekolah123',
         ]);
         User::create([
             'name' => 'siswa1',
@@ -59,6 +87,14 @@ class DatabaseSeeder extends Seeder
             'user_id' => 4,
             'link_id' => 1,
             'status_progress' => 'belum dikerjakan'
+        ]);
+        SubsList::create([
+            'user_id' => 2,
+            'subscription_id' => 1
+        ]);
+        SubsList::create([
+            'user_id' => 3,
+            'subscription_id' => 1
         ]);
     }
 }

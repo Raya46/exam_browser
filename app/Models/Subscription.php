@@ -18,7 +18,7 @@ class Subscription extends Model
         'currency',
     ];
 
-    public function subslist(){
-        return $this->hasMany(SubsList::class);
+    public function pays(){
+        return $this->hasMany(Pay::class);
     }
 }

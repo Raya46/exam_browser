@@ -88,13 +88,5 @@ class DatabaseSeeder extends Seeder
             'link_id' => 1,
             'status_progress' => 'belum dikerjakan'
         ]);
-        SubsList::create([
-            'user_id' => 2,
-            'subscription_id' => 1
-        ]);
-        SubsList::create([
-            'user_id' => 3,
-            'subscription_id' => 1
-        ]);
     }
 }

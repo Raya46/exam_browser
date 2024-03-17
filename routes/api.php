@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\LinkController;
+use App\Http\Controllers\PayController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'postLogin']);
-
+Route::post('/pay', [PayController::class, 'pay']);
+Route::get('/subscription', [SubscriptionController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
@@ -31,7 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [UserController::class, 'deleteSiswa']);
         Route::put('/{id}', [UserController::class, 'updateSiswa']);
     });
-    Route::get('/subscription', [SubscriptionController::class, 'index']);
     Route::prefix('subscription')->group(function (){
         Route::get('/{id}', [SubscriptionController::class, 'show']);
         Route::post('/post', [SubscriptionController::class, 'store']);

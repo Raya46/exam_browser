@@ -69,23 +69,4 @@ class SubscriptionController extends Controller
             'data' => 'berhasil'
         ]);
     }
-
-    public function getUserSubs(){
-        $data = SubsList::with('subscription', 'user')->get();
-
-        return response()->json([
-            'data' => $data
-        ]);
-    }
-
-    public function postUserSubs(Request $request){
-        SubsList::create([
-            'user_id' => Auth::user()->id,
-            'subscription_id' => $request->subscription_id
-        ]);
-
-        return response()->json([
-            'data' => 'berhasil langganan'
-        ]);
-    }
 }

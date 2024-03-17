@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subs_lists', function (Blueprint $table) {
+        Schema::create('pays', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->nullable();
+            $table->string('name');
+            $table->double('amount')->default(0);
+            $table->text('note')->nullable();
+            $table->string('status')->default('pending');
+            $table->string('snap_token')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
             $table->timestamps();
@@ -24,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subs_lists');
+        Schema::dropIfExists('pays');
     }
 };

@@ -15,6 +15,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'role',
+        'token',
         'password',
         'kelas_jurusan',
         'nilai',
@@ -35,7 +36,7 @@ class User extends Authenticatable
         return $this->hasMany(Progress::class);
     }
 
-    public function subslist(){
-        return $this->hasMany(SubsList::class);
+    public function pay(){
+        return $this->hasMany(Pay::class);
     }
 }

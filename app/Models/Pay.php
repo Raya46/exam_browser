@@ -5,22 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SubsList extends Model
+class Pay extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'subscription_id',
+        'code',
+        'name',
+        'amount',
+        'note',
+        'status',
+        'snap_token',
     ];
 
-    public function subscription()
-    {
+    public function subscription(){
         return $this->belongsTo(Subscription::class);
     }
 
-    public function user()
-    {
+    public function user(){
         return $this->belongsTo(User::class);
     }
 }

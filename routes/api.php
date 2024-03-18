@@ -7,10 +7,11 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'postLogin']);
-Route::post('/pay', [PayController::class, 'pay']);
-Route::get('/subscription', [SubscriptionController::class, 'index']);
+Route::post('/pay/hook', [PayController::class, 'webhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/pay', [PayController::class, 'pay']);
+    Route::get('/subscription', [SubscriptionController::class, 'index']);
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/links', [LinkController::class, 'index']);
     Route::prefix('links')->group(function (){
@@ -38,9 +39,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/post', [SubscriptionController::class, 'store']);
         Route::delete('/{id}', [SubscriptionController::class, 'destroy']);
         Route::put('/{id}', [SubscriptionController::class, 'putSubscription']);
-    });
-    Route::get('/usersubs', [SubscriptionController::class, 'getUserSubs']);
-    Route::prefix('usersubs')->group(function (){
-        Route::post('/post', [SubscriptionController::class, 'postUserSubs']);
     });
 });

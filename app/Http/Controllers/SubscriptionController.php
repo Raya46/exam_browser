@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subscription;
-use App\Models\SubsList;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
 {

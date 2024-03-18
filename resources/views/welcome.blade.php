@@ -19,6 +19,7 @@
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-8 col-12">
                     <h2 class="fs-5 py-4 text-center">
+                        {{ auth()->user() }}
                         Integrasi Midtrans dengan Laravel {{ csrf_token() }}
                     </h2>
                     <div class="card border rounded shadow">

@@ -4,36 +4,68 @@ namespace App\Http\Controllers;
 
 use App\Models\Progress;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     public function postLogin(Request $request)
     {
-        $validate = $request->validate([
-            "name" => "required",
-            "password" => "required",
-        ]);
-        $token = User::where("name", $request->name)->first()->createToken('auth')->plainTextToken;
+        try {
+            $validateUser = Validator::make($request->all(),
+            [
+                'name' => 'required',
+                'password' => 'required'
+            ]);
 
-        if (!Auth::attempt($validate)) return response()->json([
-            'message' => 'wrong username or password',
-            'data' => $validate
-        ], 404);
+            if($validateUser->fails()){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validateUser->errors()
+                ], 401);
+            }
 
-        if (Auth::user()->role == 'admin') return response()->json([
-            'message' => 'admin',
-            'data' => $validate,
-            'token' => $token
-        ], 200);
+            if(!Auth::attempt($request->only(['name', 'password']))){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'name & Password does not match with our record.',
+                ], 401);
+            }
 
-        return response()->json([
-            'message' => 'siswa',
-            'data' => $validate,
-            'token' => $token
-        ], 200);
+            $user = User::where('name', $request->name)->first();
+
+            if(Auth::user()->role == 'super admin'){
+                return response()->json([
+                    'status' => true,
+                    'message' => 'super admin',
+                    'token' => $user->createToken("API TOKEN")->plainTextToken
+                ], 200);
+            }
+
+            if(Auth::user()->role == 'admin sekolah'){
+                return response()->json([
+                    'status' => Auth::user()->id,
+                    'message' => 'admin sekolah',
+                    'token' => $user->createToken("API TOKEN")->plainTextToken
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'siswa',
+                'token' => $user->createToken("API TOKEN")->plainTextToken
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function logout(): JsonResponse
@@ -182,5 +214,22 @@ class UserController extends Controller
         return response()->json([
             'data' => $data
         ]);
+    }
+
+    public function checkExpiryDate()
+    {
+        $subscribedUsers = User::where('subscription_status', 'active')->get();
+
+        foreach ($subscribedUsers as $user) {
+            // Periksa apakah tanggal berlangganan sudah lebih dari 30 hari yang lalu
+            $expiryDate = Carbon::parse($user->subscription_expiry_date);
+            $thirtyDaysAgo = Carbon::now()->subDays(30);
+
+            if ($expiryDate->lte($thirtyDaysAgo)) {
+                // Perbarui status langganan menjadi expired
+                $user->subscription_status = 'expired';
+                $user->save();
+            }
+        }
     }
 }

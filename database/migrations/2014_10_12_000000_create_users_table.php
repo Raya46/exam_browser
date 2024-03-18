@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('token')->nullable();
-            $table->enum('role', ['super admin','admin sekolah', 'siswa']);
+            $table->enum('role', ['super admin', 'admin sekolah', 'siswa']);
             $table->string('password');
             $table->string('kelas_jurusan')->nullable();
             $table->double('nilai')->nullable();
-            $table->rememberToken();
+            $table->enum('subscription_status', ['active', 'expired'])->nullable();
+            $table->timestamp('subscription_expiry_date')->nullable();
             $table->timestamps();
         });
     }

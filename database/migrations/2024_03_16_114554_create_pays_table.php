@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('pays', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->nullable();
-            $table->string('name');
-            $table->double('amount')->default(0);
-            $table->text('note')->nullable();
-            $table->string('status')->default('pending');
-            $table->string('snap_token')->nullable();
+            $table->string('order_id');
+            $table->string('status');
+            $table->double('price')->default(0);
+            $table->string('item_name');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
             $table->timestamps();

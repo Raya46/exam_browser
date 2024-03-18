@@ -10,12 +10,13 @@ class Pay extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code',
-        'name',
-        'amount',
-        'note',
+        'order_id',
         'status',
-        'snap_token',
+        'price',
+        'item_name',
+        'checkout_link',
+        'user_id',
+        'subscription_id',
     ];
 
     public function subscription(){

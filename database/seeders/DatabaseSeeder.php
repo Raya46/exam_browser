@@ -48,30 +48,42 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'admin@sekolah1.com',
             'role' => 'admin sekolah',
+            'sekolah' => 'sekolah1',
             'password' => 'adminsekolah123',
         ]);
         User::create([
             'name' => 'admin@sekolah2.com',
             'role' => 'admin sekolah',
+            'sekolah' => 'sekolah2',
             'password' => 'adminsekolah123',
         ]);
         User::create([
             'name' => 'siswa1',
             'role' => 'siswa',
             'password' => 'siswa123',
+            'sekolah' => 'sekolah1',
             'kelas_jurusan' => '12 RPL',
         ]);
         User::create([
             'name' => 'siswa2',
             'role' => 'siswa',
             'password' => 'siswa123',
+            'sekolah' => 'sekolah1',
             'kelas_jurusan' => '12 AKL',
         ]);
         User::create([
             'name' => 'siswa3',
             'role' => 'siswa',
             'password' => 'siswa123',
+            'sekolah' => 'sekolah2',
             'kelas_jurusan' => '11 RPL',
+        ]);
+        User::create([
+            'name' => 'siswa4',
+            'role' => 'siswa',
+            'password' => 'siswa123',
+            'sekolah' => 'sekolah2',
+            'kelas_jurusan' => '10 RPL',
         ]);
         Progress::create([
             'user_id' => 2,

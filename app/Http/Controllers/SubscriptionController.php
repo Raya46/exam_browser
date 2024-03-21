@@ -27,7 +27,7 @@ class SubscriptionController extends Controller
         ]);
 
         return response()->json([
-            'data' => 'berhasil'
+            'data' => 'success'
         ]);
     }
 
@@ -37,7 +37,7 @@ class SubscriptionController extends Controller
 
         $data->delete();
         return response()->json([
-            'data' => 'berhasil'
+            'data' => 'success'
         ]);
     }
 
@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
         ]);
 
         return response()->json([
-            'data' => 'berhasil'
+            'data' => 'success'
         ]);
     }
 }

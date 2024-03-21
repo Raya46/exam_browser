@@ -19,19 +19,32 @@ class CheckSubscriptionStatus implements ShouldQueue
      */
     public function handle()
     {
-        // Ambil semua pengguna yang berlangganan aktif
-        $subscribedUsers = User::where('subscription_status', 'active')->get();
+        $activeUsers = User::whereNotNull('token')
+            ->whereIn('role', ['admin sekolah', 'siswa'])
+            ->where('subscription_status', 'active')
+            ->get();
 
-        foreach ($subscribedUsers as $user) {
-            // Periksa apakah tanggal berlangganan sudah lebih dari 30 hari yang lalu
+        $activeSchools = $activeUsers->pluck('sekolah')->unique();
+
+        foreach ($activeUsers as $user) {
             $expiryDate = Carbon::parse($user->subscription_expiry_date);
             $thirtyDaysAgo = Carbon::now()->subDays(30);
 
             if ($expiryDate->lte($thirtyDaysAgo)) {
-                // Perbarui status langganan menjadi expired
-                $user->subscription_status = 'expired';
+                if ($user->role === 'admin sekolah') {
+                    $user->subscription_status = 'expire';
+                    $user->token = '';
+                } else {
+                    if ($activeSchools->contains($user->sekolah)) {
+                        $user->subscription_status = 'expire';
+                        $user->token = '';
+                    }
+                }
                 $user->save();
+            } else {
+                continue;
             }
         }
     }
+
 }

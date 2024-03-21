@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('link_id')->constrained()->onDelete('cascade');
-            $table->enum('status_progress', ['belum dikerjakan', 'dikerjakan', 'selesai']);
+            $table->enum('status_progress', ['belum dikerjakan', 'dikerjakan', 'selesai'])->default('belum dikerjakan');
             $table->timestamps();
         });
     }

@@ -18,12 +18,9 @@ class User extends Authenticatable
         'token',
         'password',
         'kelas_jurusan',
-        'nilai',
-        'subscription_id',
-    ];
-
-    protected $hidden = [
-        'password'
+        'sekolah',
+        'subscription_status',
+        'subscription_expiry_date'
     ];
 
     protected $casts = [

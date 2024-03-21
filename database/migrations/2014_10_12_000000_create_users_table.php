@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('role', ['super admin', 'admin sekolah', 'siswa']);
             $table->string('password');
             $table->string('kelas_jurusan')->nullable();
-            $table->double('nilai')->nullable();
+            $table->string('sekolah')->nullable();
             $table->enum('subscription_status', ['active', 'expired'])->nullable();
             $table->timestamp('subscription_expiry_date')->nullable();
             $table->timestamps();

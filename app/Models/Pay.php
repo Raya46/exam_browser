@@ -14,7 +14,6 @@ class Pay extends Model
         'status',
         'price',
         'item_name',
-        'checkout_link',
         'user_id',
         'subscription_id',
     ];
@@ -26,4 +25,6 @@ class Pay extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public $timestamps = false;
 }

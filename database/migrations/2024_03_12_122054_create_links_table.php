@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('links', function (Blueprint $table) {
             $table->id();
-            $table->text('link_name');
+            $table->string('link_name');
+            $table->string('link_title');
+            $table->string('sekolah');
             $table->string('link_title');
             $table->string('kelas_jurusan');
             $table->enum('link_status', ['active', 'inactive']);

@@ -15,16 +15,15 @@ class Pay extends Model
         'price',
         'item_name',
         'user_id',
-        'subscription_id',
+        'item_id',
     ];
 
-    public function subscription(){
-        return $this->belongsTo(Subscription::class);
+    public function item(){
+        return $this->belongsTo(Item::class);
     }
 
     public function user(){
         return $this->belongsTo(User::class);
     }
 
-    public $timestamps = false;
 }

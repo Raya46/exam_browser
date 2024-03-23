@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pay;
 use App\Models\Progress;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
@@ -102,75 +102,51 @@ class UserController extends Controller
 
     public function indexAdminSekolah()
     {
-        $data = User::where('role', 'siswa')->where('sekolah', Auth::user()->sekolah)->get();
+        $role = ['siswa', 'admin sekolah'];
+        $status_pay = ['settlement', 'capture'];
+        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->get();
+        $paid = Pay::whereHas('user', function($query){
+            $query->where('sekolah', Auth::user()->sekolah);
+        })->whereIn('status', $status_pay)->with('item')->latest()->first();
 
         return response()->json([
+            'paid' => $paid,
             'data' => $data
         ]);
     }
 
-    public function createAdminSekolah(Request $request)
-    {
-        User::create([
-            'name' => $request->name,
-            'role' => 'admin sekolah',
-            'password' => $request->password,
-            'sekolah' => $request->sekolah
-        ]);
-
-        return response()->json([
-            'data' => 'success'
-        ]);
-    }
-
-    public function deleteAdminSekolah($id)
-    {
-        $data = User::find($id);
-
-        $data->delete();
-
-        return response()->json([
-            "data" => "success delete $data"
-        ]);
-    }
-
-    public function updateAdminSekolah(Request $request, $id)
-    {
-        $user = User::find($id);
-        $checkUsername = User::where('name', $request->name)->first();
-        if ($checkUsername && $request->name != $user->name) return response()->json([
-            'data' => 'nama sudah digunakan'
-        ]);
-
-        if ($request->password == null || $request->password == "") {
-            $user->update([
-                'name' => $request->name,
-                'role' => $request->role
-            ]);
-            return response()->json([
-                'data' => 'success'
-            ]);
-        } else {
-            $user->update([
-                'name' => $request->name,
-                'password' => $request->password,
-                'role' => $request->role
-            ]);
-            return response()->json([
-                'data' => 'success'
-            ]);
-        }
-    }
-
-    public function createSiswa(Request $request)
+    public function createSiswaAdminSekolah(Request $request)
     {
         $user = User::where('role', 'admin sekolah')->where('id', Auth::user()->id)->first();
+        $status_pay = ['settlement', 'capture'];
+        $schoolUsersCount = User::where('sekolah', Auth::user()->sekolah)->count();
+        $paid = Pay::whereHas('user', function($query){
+            $query->where('sekolah', Auth::user()->sekolah);
+        })->whereIn('status', $status_pay)->with('item')->latest()->first();
+
+        if ($schoolUsersCount >= $paid->item->user_quantity) {
+            return response()->json([
+                'message' => 'Maaf, tidak bisa menambahkan pengguna baru karena jumlah pengguna dengan sekolah yang sama sudah mencapai batas maksimum.'
+            ], 403); // 403: Forbidden
+        }
+        if($request->role == "admin sekolah"){
+            User::create([
+                'name' => $request->name,
+                'role' => 'admin sekolah',
+                'password' => $request->password,
+                'token' => $request->token . strtoupper($user->sekolah),
+                'sekolah' => strtoupper($user->sekolah),
+                'kelas_jurusan' => strtoupper($request->kelas_jurusan)
+            ]);
+        }
+
         User::create([
             'name' => $request->name,
             'role' => 'siswa',
             'password' => $request->password,
-            'token' => $user->token,
-            'sekolah' => $user->sekolah,
+            'token' => $request->token . strtoupper($user->sekolah),
+            'sekolah' => strtoupper($user->sekolah),
+            'kelas_jurusan' => strtoupper($request->kelas_jurusan)
         ]);
 
         return response()->json([
@@ -178,9 +154,10 @@ class UserController extends Controller
         ]);
     }
 
-    public function deleteSiswa($id)
+    public function deleteSiswaAdminSekolah($id)
     {
-        $data = User::where('role', 'siswa')->find($id);
+        $role = ['siswa', 'admin sekolah'];
+        $data = User::whereIn('role', $role)->find($id);
 
         $data->delete();
 
@@ -189,17 +166,17 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateSiswa(Request $request, $id)
+    public function updateSiswaAdminSekolah(Request $request, $id)
     {
-        $user = User::where('role', 'siswa')->find($id);
-        $checkUsername = User::where('name', $request->name)->first();
-        if ($checkUsername && $request->name != $user->name) return response()->json([
-            'data' => 'nama sudah digunakan'
-        ]);
+        $role = ['siswa', 'admin sekolah'];
+        $user = User::whereIn('role', $role)->find($id);
 
         if ($request->password == null || $request->password == "") {
             $user->update([
                 'name' => $request->name,
+                'token' => $request->token,
+                'role' => $request->role,
+                'kelas_jurusan' => $request->kelas_jurusan
             ]);
             return response()->json([
                 'data' => 'success'
@@ -209,7 +186,8 @@ class UserController extends Controller
                 'name' => $request->name,
                 'password' => $request->password,
                 'token' => $request->token,
-                'role' => $request->role
+                'role' => $request->role,
+                'kelas_jurusan' => $request->kelas_jurusan
             ]);
             return response()->json([
                 'data' => 'success'
@@ -230,9 +208,10 @@ class UserController extends Controller
     {
         User::create([
             'name' => $request->name,
+            'role' => $request->role,
             'password' => $request->password,
-            'role' => 'admin sekolah',
-            'sekolah' => $request->sekolah
+            'sekolah' => strtoupper($request->sekolah),
+            'kelas_jurusan' => strtoupper($request->kelas_jurusan)
         ]);
 
         return response()->json([

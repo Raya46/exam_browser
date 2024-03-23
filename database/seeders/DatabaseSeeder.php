@@ -4,10 +4,9 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Item;
 use App\Models\Link;
 use App\Models\Progress;
-use App\Models\Subscription;
-use App\Models\SubsList;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -22,23 +21,8 @@ class DatabaseSeeder extends Seeder
             'link_name' => 'https://docs.google.com/forms/d/e/1FAIpQLSfgXFzWuOo9sWAx3v4LfnNZWnTTLx6jwnmGnx4_qiOE75lV1w/viewform',
             'link_title' => 'ujian 2022/2023',
             'link_status' => 'active',
+            'sekolah' => 'sekolah1',
             'kelas_jurusan' => '12 RPL'
-        ]);
-        Subscription::create([
-            'name' => '1 MONTH',
-            'description' => 'free 1 month',
-            'price' => 10000,
-            'invoice_period' => 1,
-            'invoice_interval' => 'month',
-            'currency' => 'IDR',
-        ]);
-        Subscription::create([
-            'name' => '1 YEAR',
-            'description' => 'free 1 year',
-            'price' => 100000,
-            'invoice_period' => 1,
-            'invoice_interval' => 'year',
-            'currency' => 'IDR',
         ]);
         User::create([
             'name' => 'super admin',
@@ -50,6 +34,18 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin sekolah',
             'sekolah' => 'sekolah1',
             'password' => 'adminsekolah123',
+        ]);
+        Item::create([
+            'name' => '1000 user',
+            'description' => '1000 user for lifetime',
+            'price' => 5000000,
+            'user_quantity' => 1000
+        ]);
+        Item::create([
+            'name' => '770 user',
+            'description' => '770 user for lifetime',
+            'price' => 3500000,
+            'user_quantity' => 770
         ]);
         User::create([
             'name' => 'admin@sekolah2.com',

@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('password');
             $table->string('token')->nullable();
             $table->enum('role', ['super admin', 'admin sekolah', 'siswa']);
-            $table->string('password');
             $table->string('kelas_jurusan')->nullable();
             $table->string('sekolah')->nullable();
-            $table->enum('subscription_status', ['active', 'expired'])->nullable();
-            $table->timestamp('subscription_expiry_date')->nullable();
+            $table->string('serial_number')->nullable()->unique();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Link;
 use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -37,7 +36,7 @@ class ProgressController extends Controller
 
     public function userProgress(){
         $data = Progress::whereHas('user', function ($query) {
-            $query->where('role', 'siswa');
+            $query->where('role', 'siswa')->where('sekolah', Auth::user()->sekolah);
         })->with('link', 'user')->get();
 
         return response()->json([

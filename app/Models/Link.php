@@ -9,20 +9,16 @@ class Link extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $fillable =[
         'link_name',
         'link_title',
+        'sekolah',
+        'kelas_jurusan',
         'link_status',
-        'kelas_jurusan'
     ];
 
     public function progress()
     {
         return $this->hasMany(Progress::class);
-    }
-
-    public function user()
-    {
-        return $this->hasMany(User::class);
     }
 }

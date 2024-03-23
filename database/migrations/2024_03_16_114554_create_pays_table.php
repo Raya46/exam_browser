@@ -18,7 +18,7 @@ return new class extends Migration
             $table->double('price')->default(0);
             $table->string('item_name');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
+            $table->foreignId('item_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

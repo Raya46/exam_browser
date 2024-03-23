@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Subscription extends Model
+class Item extends Model
 {
     use HasFactory;
 
@@ -13,12 +13,11 @@ class Subscription extends Model
         'name',
         'description',
         'price',
-        'invoice_period',
-        'invoice_interval',
-        'currency',
+        'user_quantity',
     ];
 
-    public function pays(){
+    public function pays()
+    {
         return $this->hasMany(Pay::class);
     }
 }

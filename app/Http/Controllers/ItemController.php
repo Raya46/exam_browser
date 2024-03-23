@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Subscription;
+use App\Models\Item;
 use Illuminate\Http\Request;
 
-class SubscriptionController extends Controller
+class ItemController extends Controller
 {
     public function index(){
-        $data = Subscription::all();
+        $data = Item::all();
 
         return response()->json([
             'data' => $data
@@ -17,13 +17,11 @@ class SubscriptionController extends Controller
 
     public function store(Request $request)
     {
-        Subscription::create([
+        Item::create([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
-            'invoice_period' => $request->invoice_period,
-            'invoice_interval' => $request->invoice_interval,
-            'currency' => $request->currency,
+            'user_quantity' => $request->user_quantity,
         ]);
 
         return response()->json([
@@ -33,7 +31,7 @@ class SubscriptionController extends Controller
 
     public function destroy($id)
     {
-        $data = Subscription::find($id);
+        $data = Item::find($id);
 
         $data->delete();
         return response()->json([
@@ -43,24 +41,22 @@ class SubscriptionController extends Controller
 
     public function show($id)
     {
-        $data = Subscription::find($id);
+        $data = Item::find($id);
 
         return response()->json([
             'data' => $data
         ]);
     }
 
-    public function putSubscription(Request $request, $id)
+    public function putItem(Request $request, $id)
     {
-        $data = Subscription::find($id);
+        $data = Item::find($id);
 
         $data->update([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
-            'invoice_period' => $request->invoice_period,
-            'invoice_interval' => $request->invoice_interval,
-            'currency' => $request->currency,
+            'user_quantity' => $request->user_quantity,
         ]);
 
         return response()->json([

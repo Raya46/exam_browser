@@ -14,13 +14,13 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'role',
-        'token',
         'password',
+        'token',
+        'role',
         'kelas_jurusan',
         'sekolah',
-        'subscription_status',
-        'subscription_expiry_date'
+        'serial_number',
+        'status'
     ];
 
     protected $casts = [
@@ -32,7 +32,8 @@ class User extends Authenticatable
         return $this->hasMany(Progress::class);
     }
 
-    public function pay(){
+    public function pay()
+    {
         return $this->hasMany(Pay::class);
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Pay;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -22,14 +21,13 @@ class PayController extends Controller
     public function pay(Request $request)
     {
         $snapToken = null;
-
         $donation = Pay::create([
-            'order_id'   => 'ACT-' . mt_rand(100000, 999999),
+            'order_id'   => 'ACT-'.mt_rand(10000,99999),
             'status'   => 'pending',
             'item_name'   => $request->item_name,
             'price' => $request->price,
             'user_id' => Auth::user()->id,
-            'subscription_id' => $request->subscription_id,
+            'item_id' => $request->item_id,
         ]);
         $payload = [
             'transaction_details' => [
@@ -72,44 +70,48 @@ class PayController extends Controller
     public function webhook(Request $request)
     {
         $auth = base64_encode(env('MIDTRANS_SERVER_KEY'));
-
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Authorization' => "Basic $auth"
         ])->get("https://api.sandbox.midtrans.com/v2/$request->order_id/status");
-
         $response = json_decode($response->body());
-
         $pay = Pay::where('order_id', $response->order_id)->first();
-        $user = User::where('role', 'admin sekolah')->where('id', $pay->user_id)->first();
+        $admin_sekolah = User::where('role', 'admin sekolah')->where('id', $pay->user_id)->first();
+        $students = User::where('role', 'siswa')->where('sekolah', $admin_sekolah->sekolah)->get();
+        $lastOrderNumber = Pay::where('user_id', $admin_sekolah->id)->max('id');
+        $lastOrderNumber = (int) substr($lastOrderNumber, 4, 3);
+        $newOrderNumber = $lastOrderNumber + 1;
+        $newOrderNumber = str_pad($newOrderNumber, 3, '0', STR_PAD_LEFT);
 
         if ($response->transaction_status == 'capture') {
             $pay->status = 'capture';
             User::where('role', 'admin sekolah')->where('id', $pay->user_id)->update([
-                'subscription_status' => 'active',
-                'subscription_expiry_date' => Carbon::now()->addDays(30),
+                'status' => 'active',
                 'token' => $pay->order_id,
             ]);
 
-            User::where('role', 'siswa')->where('sekolah', $user->sekolah)->update([
-                'subscription_status' => 'active',
-                'subscription_expiry_date' => Carbon::now()->addDays(30),
-                'token' => $pay->order_id,
-            ]);
+            foreach ($students as $index => $student) {
+                $studentToken = 'USR' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . strtoupper($admin_sekolah->sekolah);
+                User::where('id', $student->id)->update([
+                    'status' => 'active',
+                    'token' => $studentToken,
+                ]);
+            }
         }
         if ($response->transaction_status == 'settlement') {
             $pay->status = 'settlement';
             User::where('role', 'admin sekolah')->where('id', $pay->user_id)->update([
-                'subscription_status' => 'active',
-                'subscription_expiry_date' => Carbon::now()->addDays(30),
+                'status' => 'active',
                 'token' => $pay->order_id,
             ]);
 
-            User::where('role', 'siswa')->where('sekolah', $user->sekolah)->update([
-                'subscription_status' => 'active',
-                'subscription_expiry_date' => Carbon::now()->addDays(30),
-                'token' => $pay->order_id,
-            ]);
+            foreach ($students as $index => $student) {
+                $studentToken = 'USR' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . strtoupper($admin_sekolah->sekolah);
+                User::where('id', $student->id)->update([
+                    'status' => 'active',
+                    'token' => $studentToken,
+                ]);
+            }
         }
         if ($response->transaction_status == 'pending') {
             $pay->status = 'pending';
@@ -130,12 +132,7 @@ class PayController extends Controller
 
     public function getUserSubs()
     {
-        $pays = Pay::with('subscription', 'user')->get();
-
-        foreach ($pays as $pay) {
-            $pay->created_at = Carbon::parse($pay->created_at)->format('d M Y');
-        }
-
+        $pays = Pay::with('item', 'user')->get();
         return response()->json([
             'data' => $pays
         ]);

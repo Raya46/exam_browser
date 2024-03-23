@@ -4,31 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\Link;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LinkController extends Controller
 {
     public function index()
     {
-        $links = Link::with('progress')->latest()->take(10)->get();
+        $links = Link::where('sekolah', Auth::user()->sekolah)->get();
 
         return response()->json([
-            'data' => $links
+            'data' => $links,
+            'user' => Auth::user()->sekolah
         ], 200);
     }
 
-    public function store(Request $request)
+    public function storeLink(Request $request)
     {
+
         Link::create([
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
+            'sekolah' => Auth::user()->sekolah,
+            'kelas_jurusan' => $request->kelas_jurusan,
             'link_status' => $request->link_status,
-            'kelas_jurusan' => $request->kelas_jurusan
         ]);
 
         return response()->json([
             'data' => 'success'
         ]);
     }
+
 
     public function destroy($id)
     {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportSiswa;
+use App\Imports\ImportSiswa;
 use App\Models\Pay;
 use App\Models\Progress;
 use App\Models\User;
@@ -9,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -114,6 +117,31 @@ class UserController extends Controller
             'data' => $data
         ]);
     }
+
+    public function export_siswa_excel(){
+        $sekolah = Auth::user()->sekolah;
+        return Excel::download(new ExportSiswa, "$sekolah.xlsx");
+    }
+
+    public function import_siswa_excel(Request $request){
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls', // Pastikan file berformat Excel
+        ]);
+
+        try {
+            Excel::import(new ImportSiswa(), $request->file('file'));
+
+            return response()->json([
+                'message' => 'Data siswa berhasil diimpor.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengimpor data siswa. Silakan cek kembali format file Anda.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     public function createSiswaAdminSekolah(Request $request)
     {

@@ -29,6 +29,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [UserController::class, 'deleteSiswaAdminSekolah']);
         Route::put('/{id}', [UserController::class, 'updateSiswaAdminSekolah']);
     });
+    Route::get('/admin-sekolah/siswa-export', [UserController::class, 'export_siswa_excel']);
+    Route::post('/admin-sekolah/siswa-import', [UserController::class, 'import_siswa_excel']);
     Route::get('/admin-sekolah', [UserController::class, 'indexAdminSekolah']);
     Route::prefix('admin-sekolah')->group(function (){
         Route::get('/{id}', [UserController::class, 'showUser']);

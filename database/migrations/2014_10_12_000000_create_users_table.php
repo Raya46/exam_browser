@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('sekolah')->nullable();
             $table->string('serial_number')->nullable()->unique();
             $table->string('status')->nullable();
-            $table->double('nilai')->nullable();
             $table->timestamps();
         });
     }

@@ -8,12 +8,14 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'postLogin']);
+Route::post('/login-siswa', [UserController::class, 'loginSiswaAdmin']);
 Route::post('/register', [UserController::class, 'registerAdminSekolah']);
 Route::get('/item', [ItemController::class, 'index']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
+    Route::post('/verify', [UserController::class, 'updateOrVerifySerialNumber']);
     Route::get('/links', [LinkController::class, 'index']);
     Route::post('/links/post', [LinkController::class, 'storeLink']);
     Route::prefix('links')->group(function (){
@@ -39,10 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [UserController::class, 'updateSiswaAdminSekolah']);
     });
     Route::get('/progress', [ProgressController::class, 'userProgress']);
-    Route::put('/progress/user/{id}', [ProgressController::class, 'progressUser']);
+    Route::put('/progress/user', [ProgressController::class, 'progressUser']);
     Route::prefix('progress')->group(function (){
         Route::get('/{id}', [ProgressController::class, 'show']);
-        Route::post('/post', [ProgressController::class, 'createProgress']);
+        Route::post('/post', [ProgressController::class, 'createOrUpdateProgress']);
         Route::put('/{id}', [ProgressController::class, 'updateProgress']);
     });
     Route::prefix('item')->group(function (){

@@ -59,7 +59,6 @@ class DatabaseSeeder extends Seeder
             'password' => 'siswa123',
             'sekolah' => 'sekolah1',
             'kelas_jurusan' => '12 RPL',
-            'nilai' => 90
         ]);
         User::create([
             'name' => 'siswa2',
@@ -67,7 +66,6 @@ class DatabaseSeeder extends Seeder
             'password' => 'siswa123',
             'sekolah' => 'sekolah1',
             'kelas_jurusan' => '12 AKL',
-            'nilai' => 80
         ]);
         User::create([
             'name' => 'siswa3',

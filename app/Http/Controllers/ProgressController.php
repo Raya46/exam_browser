@@ -9,8 +9,33 @@ use Illuminate\Support\Facades\Auth;
 
 class ProgressController extends Controller
 {
-    public function progressUser(Request $request, $id){
-        $progress = Progress::find($id);
+    public function createOrUpdateProgress(Request $request)
+    {
+        $user = User::where('role', 'siswa')->where('id', Auth::user()->id)->first();
+        $progress = Progress::where('user_id', Auth::user()->id)->where('link_id', $request->link_id)->first();
+
+        if (empty($progress)) {
+            $progressCreated = Progress::create([
+                'user_id' => $user->id,
+                'link_id' => $request->link_id,
+                'status_progress' => 'dikerjakan',
+            ]);
+            return response()->json([
+                'data' => $progressCreated
+            ]);
+        } else {
+            $progressUpdated = $progress->update([
+                'link_id' => $request->link_id,
+                'status_progress' => $request->status_progress
+            ]);
+            return response()->json([
+                'data' => $progressUpdated
+            ]);
+        }
+    }
+
+    public function progressUser(Request $request){
+        $progress = Progress::where('user_id', Auth::user()->id)->where('link_id', $request->link_id)->first();
         $user = User::where('role', 'siswa')->where('id', Auth::user()->id)->first();
 
         $progress->update([
@@ -18,9 +43,14 @@ class ProgressController extends Controller
             'link_id' => $request->link_id,
             'status_progress' => $request->status_progress
         ]);
+
+        return response()->json([
+            'data' => $request->status_progress
+        ]);
     }
 
-    public function updateProgress(Request $request, $id){
+    public function updateProgress(Request $request, $id)
+    {
         $progress = Progress::find($id);
 
         $progress->update([
@@ -34,7 +64,8 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function userProgress(){
+    public function userProgress()
+    {
         $data = Progress::whereHas('user', function ($query) {
             $query->where('role', 'siswa')->where('sekolah', Auth::user()->sekolah);
         })->with('link', 'user')->get();
@@ -44,25 +75,12 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function show($id){
-        $progress = Progress::with('link','user')->where('id',$id)->first();
+    public function show($id)
+    {
+        $progress = Progress::with('link', 'user')->where('id', $id)->first();
 
         return response()->json([
             'data' => $progress
-        ]);
-    }
-
-    public function createProgress(Request $request){
-        $user = User::where('role', 'siswa')->where('id', Auth::user()->id)->first();
-
-        Progress::create([
-            'user_id' => $user->id,
-            'link_id' => $request->link_id,
-            'status_progress' => 'dikerjakan'
-        ]);
-
-        return response()->json([
-            'data' => 'success'
         ]);
     }
 }

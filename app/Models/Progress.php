@@ -11,7 +11,8 @@ class Progress extends Model
 
     protected $fillable = [
         'user_id',
-        'item_id',
+        'link_id',
+        'nilai',
         'status_progress'
     ];
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('link_title');
             $table->string('sekolah');
             $table->string('kelas_jurusan');
-            $table->enum('link_status', ['active', 'inactive']);
+            $table->enum('link_status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }

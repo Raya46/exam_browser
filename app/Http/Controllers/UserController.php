@@ -22,7 +22,7 @@ class UserController extends Controller
                 $request->all(),
                 [
                     'name' => 'required',
-                    'password' => 'required'
+                    'password' => 'required',
                 ]
             );
 
@@ -51,17 +51,9 @@ class UserController extends Controller
                 ], 200);
             }
 
-            if (Auth::user()->role == 'admin sekolah') {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'admin sekolah',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
-            }
-
             return response()->json([
                 'status' => true,
-                'message' => 'siswa',
+                'message' => 'admin sekolah',
                 'token' => $user->createToken("API TOKEN")->plainTextToken
             ], 200);
         } catch (\Throwable $th) {
@@ -71,6 +63,92 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function updateOrVerifySerialNumber(Request $request)
+    {
+        try {
+            $role = ['admin sekolah', 'siswa'];
+            $user = User::where('id', Auth::user()->id)->whereIn('role', $role)->first();
+
+            if (empty($user->serial_number)) {
+                $user->serial_number = $request->serial_number;
+                $user->save();
+                return response()->json([
+                    'data' => 'Serial number updated successfully'
+                ]);
+            }
+
+            if ($user->serial_number == $request->serial_number) {
+                return response()->json([
+                    'data' => 'Serial number valid'
+                ]);
+            } else {
+                return response()->json([
+                    'data' => 'Serial number not valid'
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'serial number used'
+            ], 500);
+        }
+    }
+
+
+
+    public function loginSiswaAdmin(Request $request)
+    {
+        try {
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'password' => 'required',
+                    'token' => 'required',
+                ]
+            );
+
+            if ($validateUser->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validateUser->errors()
+                ], 401);
+            }
+
+            if (!Auth::attempt($request->only(['name', 'password', 'serial_number', 'token']))) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'name & Password or serial number does not match with our record.',
+                ], 401);
+            }
+
+            $user = User::where('name', $request->name)->first();
+
+            if (Auth::user()->role == 'admin sekolah') {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'admin sekolah',
+                    'user' => $user,
+                    'token' => $user->createToken("API TOKEN")->plainTextToken
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'siswa',
+                'user' => $user,
+                'token' => $user->createToken("API TOKEN")->plainTextToken
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function logout(): JsonResponse
     {
@@ -105,10 +183,9 @@ class UserController extends Controller
 
     public function indexAdminSekolah()
     {
-        $role = ['siswa', 'admin sekolah'];
         $status_pay = ['settlement', 'capture'];
-        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->get();
-        $paid = Pay::whereHas('user', function($query){
+        $data = User::where('role', 'admin sekolah')->where('sekolah', Auth::user()->sekolah)->get();
+        $paid = Pay::whereHas('user', function ($query) {
             $query->where('sekolah', Auth::user()->sekolah);
         })->whereIn('status', $status_pay)->with('item')->latest()->first();
 
@@ -118,12 +195,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function export_siswa_excel(){
+    public function export_siswa_excel()
+    {
         $sekolah = Auth::user()->sekolah;
         return Excel::download(new ExportSiswa, "$sekolah.xlsx");
     }
 
-    public function import_siswa_excel(Request $request){
+    public function import_siswa_excel(Request $request)
+    {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls', // Pastikan file berformat Excel
         ]);
@@ -148,7 +227,7 @@ class UserController extends Controller
         $user = User::where('role', 'admin sekolah')->where('id', Auth::user()->id)->first();
         $status_pay = ['settlement', 'capture'];
         $schoolUsersCount = User::where('sekolah', Auth::user()->sekolah)->count();
-        $paid = Pay::whereHas('user', function($query){
+        $paid = Pay::whereHas('user', function ($query) {
             $query->where('sekolah', Auth::user()->sekolah);
         })->whereIn('status', $status_pay)->with('item')->latest()->first();
 
@@ -157,7 +236,7 @@ class UserController extends Controller
                 'message' => 'Maaf, tidak bisa menambahkan pengguna baru karena jumlah pengguna dengan sekolah yang sama sudah mencapai batas maksimum.'
             ], 403); // 403: Forbidden
         }
-        if($request->role == "admin sekolah"){
+        if ($request->role == "admin sekolah") {
             User::create([
                 'name' => $request->name,
                 'role' => 'admin sekolah',
@@ -190,7 +269,7 @@ class UserController extends Controller
         $data->delete();
 
         return response()->json([
-            "data" => "success delete $data"
+            "data" => "success"
         ]);
     }
 

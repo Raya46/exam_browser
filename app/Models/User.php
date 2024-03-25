@@ -21,7 +21,6 @@ class User extends Authenticatable
         'sekolah',
         'serial_number',
         'status',
-        'nilai'
     ];
 
     protected $casts = [

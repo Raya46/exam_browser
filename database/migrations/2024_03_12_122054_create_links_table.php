@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('sekolah');
             $table->string('kelas_jurusan');
             $table->enum('link_status', ['active', 'inactive'])->default('active');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

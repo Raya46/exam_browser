@@ -9,6 +9,7 @@ use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -183,14 +184,18 @@ class UserController extends Controller
 
     public function indexAdminSekolah()
     {
-        $status_pay = ['settlement', 'capture'];
-        $data = User::where('role', 'admin sekolah')->where('sekolah', Auth::user()->sekolah)->get();
-        $paid = Pay::whereHas('user', function ($query) {
-            $query->where('sekolah', Auth::user()->sekolah);
-        })->whereIn('status', $status_pay)->with('item')->latest()->first();
+        $role = ['siswa', 'admin sekolah'];
+        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->get();
+        $token = Auth::user()->token;
+
+        if (empty($token)) {
+            return response()->json([
+                'data' => 'bayar dulu'
+            ]);
+        }
 
         return response()->json([
-            'paid' => $paid,
+            'token' => $token,
             'data' => $data
         ]);
     }
@@ -236,20 +241,9 @@ class UserController extends Controller
                 'message' => 'Maaf, tidak bisa menambahkan pengguna baru karena jumlah pengguna dengan sekolah yang sama sudah mencapai batas maksimum.'
             ], 403); // 403: Forbidden
         }
-        if ($request->role == "admin sekolah") {
-            User::create([
-                'name' => $request->name,
-                'role' => 'admin sekolah',
-                'password' => $request->password,
-                'token' => $request->token . strtoupper($user->sekolah),
-                'sekolah' => strtoupper($user->sekolah),
-                'kelas_jurusan' => strtoupper($request->kelas_jurusan)
-            ]);
-        }
-
         User::create([
             'name' => $request->name,
-            'role' => 'siswa',
+            'role' => $request->role,
             'password' => $request->password,
             'token' => $request->token . strtoupper($user->sekolah),
             'sekolah' => strtoupper($user->sekolah),
@@ -313,11 +307,21 @@ class UserController extends Controller
 
     public function registerAdminSekolah(Request $request)
     {
+        $status_pay = ['settlement', 'capture'];
+        $paid = Pay::whereHas('user', function ($query) use ($request) {
+            $query->where('sekolah', strtoupper($request->sekolah));
+        })->whereIn('status', $status_pay)->with('user')->latest()->first();
+
+        $token = NULL;
+        if ($paid && $paid->user->sekolah == strtoupper($request->sekolah)) {
+            $token = 'ACT-' . Str::random(10);
+        }
         User::create([
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
             'sekolah' => strtoupper($request->sekolah),
+            'token' => $token, // Gunakan token yang telah dibuat
             'kelas_jurusan' => strtoupper($request->kelas_jurusan)
         ]);
 

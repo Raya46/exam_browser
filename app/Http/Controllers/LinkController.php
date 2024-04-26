@@ -26,7 +26,7 @@ class LinkController extends Controller
             'link_title' => $request->link_title,
             'sekolah' => Auth::user()->sekolah,
             'kelas_jurusan' => $request->kelas_jurusan,
-            'link_status' => $request->link_status,
+            'link_status' => 'active',
         ]);
 
         return response()->json([

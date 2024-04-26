@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class PayController extends Controller
 {
@@ -22,7 +23,7 @@ class PayController extends Controller
     {
         $snapToken = null;
         $donation = Pay::create([
-            'order_id'   => 'ACT-'.mt_rand(10000,99999),
+            'order_id'   => 'ACT-' .Str::random(10000,99999),
             'status'   => 'pending',
             'item_name'   => $request->item_name,
             'price' => $request->price,

@@ -21,9 +21,10 @@ class PayController extends Controller
 
     public function pay(Request $request)
     {
+        $order_id = Str::uuid()->toString();
         $snapToken = null;
         $donation = Pay::create([
-            'order_id'   => 'ACT-' .Str::random(10000,99999),
+            'order_id'   => 'ACT-' .$order_id,
             'status'   => 'pending',
             'item_name'   => $request->item_name,
             'price' => $request->price,

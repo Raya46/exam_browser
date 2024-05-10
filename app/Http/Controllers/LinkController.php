@@ -10,6 +10,20 @@ class LinkController extends Controller
 {
     public function index()
     {
+        $links = Link::with('progress')
+            ->where('sekolah', Auth::user()->sekolah)
+            ->where('kelas_jurusan', Auth::user()->kelas_jurusan)
+            ->whereDoesntHave('progress')
+            ->get();
+
+        return response()->json([
+            'data' => $links,
+            'user' => Auth::user()->sekolah
+        ], 200);
+    }
+
+    public function indexLinkAdmin()
+    {
         $links = Link::where('sekolah', Auth::user()->sekolah)->get();
 
         return response()->json([
@@ -17,6 +31,7 @@ class LinkController extends Controller
             'user' => Auth::user()->sekolah
         ], 200);
     }
+
 
     public function storeLink(Request $request)
     {

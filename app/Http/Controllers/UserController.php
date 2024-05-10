@@ -190,7 +190,7 @@ class UserController extends Controller
 
         if (empty($token)) {
             return response()->json([
-                'data' => 'bayar dulu'
+                'data' => []
             ]);
         }
 
@@ -245,7 +245,7 @@ class UserController extends Controller
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'token' => $request->token . strtoupper($user->sekolah),
+            'token' => 'usr-'. $request->token . '-' . strtoupper($user->sekolah),
             'sekolah' => strtoupper($user->sekolah),
             'kelas_jurusan' => strtoupper($request->kelas_jurusan)
         ]);

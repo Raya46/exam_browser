@@ -69,9 +69,9 @@ class ProgressController extends Controller
     {
         $data = Progress::whereHas('user', function ($query) {
             $query->where('role', 'siswa')
-            ->where('sekolah', Auth::user()->sekolah)
-            ->where('user_id', Auth::user()->id)
-            ->where('kelas_jurusan', Auth::user()->kelas_jurusan);
+                ->where('sekolah', Auth::user()->sekolah)
+                ->where('user_id', Auth::user()->id)
+                ->where('kelas_jurusan', Auth::user()->kelas_jurusan);
         })->with('link', 'user')->get();
 
         return response()->json([
@@ -79,11 +79,18 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function monitoringUserProgress()
+    public function monitoringUserProgress(Request $request)
     {
-        $data = Progress::whereHas('user', function ($query) {
-            $query->where('role', 'siswa')->where('sekolah', Auth::user()->sekolah);
-        })->with('link', 'user')->get();
+        $query = Progress::whereHas('user', function ($query) use ($request) {
+            $query->where('role', 'siswa')
+                ->where('sekolah', Auth::user()->sekolah);
+
+            if ($request->filled('kelas_jurusan')) {
+                $query->where('kelas_jurusan', $request->kelas_jurusan);
+            }
+        })->with('link', 'user');
+
+        $data = $query->paginate(3);
 
         return response()->json([
             'data' => $data

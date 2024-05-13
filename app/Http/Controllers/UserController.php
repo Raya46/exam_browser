@@ -7,7 +7,6 @@ use App\Imports\ImportSiswa;
 use App\Models\Pay;
 use App\Models\Progress;
 use App\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -162,19 +161,6 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function indexSiswa()
-    {
-        $data = Progress::with('user', 'link')
-            ->where('user_id', Auth::user()->id)
-            ->latest()
-            ->take(10)
-            ->get();
-
-        return response()->json([
-            'data' => $data
-        ]);
-    }
-
     public function indexSuperAdmin()
     {
         $data = User::where('role', 'admin sekolah')->get();
@@ -247,9 +233,9 @@ class UserController extends Controller
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'token' => 'usr-'. $request->token . '-' . strtoupper($user->sekolah),
-            'sekolah' => strtoupper($user->sekolah),
-            'kelas_jurusan' => strtoupper($request->kelas_jurusan)
+            'token' => 'usr-'. $request->token . '-' . $user->sekolah,
+            'sekolah' => $user->sekolah,
+            'kelas_jurusan' => $request->kelas_jurusan
         ]);
 
         return response()->json([
@@ -311,25 +297,43 @@ class UserController extends Controller
     {
         $status_pay = ['settlement', 'capture'];
         $paid = Pay::whereHas('user', function ($query) use ($request) {
-            $query->where('sekolah', strtoupper($request->sekolah));
+            $query->where('sekolah', $request->sekolah);
         })->whereIn('status', $status_pay)->with('user')->latest()->first();
         $order_id = Str::uuid()->toString();
 
         $token = NULL;
-        if ($paid && $paid->user->sekolah == strtoupper($request->sekolah)) {
+        if ($paid && $paid->user->sekolah == $request->sekolah) {
             $token = 'ACT-' . $order_id;
         }
         User::create([
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'sekolah' => strtoupper($request->sekolah),
+            'sekolah' => $request->sekolah,
             'token' => $token, // Gunakan token yang telah dibuat
-            'kelas_jurusan' => strtoupper($request->kelas_jurusan)
+            'kelas_jurusan' => $request->kelas_jurusan
         ]);
 
         return response()->json([
             'data' => 'success'
+        ]);
+    }
+
+    public function getKelasJurusanMonitoring()
+    {
+        $kelasJurusan = User::distinct()->where('sekolah', Auth::user()->sekolah)->get(['kelas_jurusan']); // Mengambil semua kelas_jurusan yang unik
+
+        return response()->json([
+            'data' => $kelasJurusan
+        ]);
+    }
+
+    public function getKelasJurusan()
+    {
+        $kelasJurusan = User::distinct()->get(['kelas_jurusan']); // Mengambil semua kelas_jurusan yang unik
+
+        return response()->json([
+            'data' => $kelasJurusan
         ]);
     }
 }

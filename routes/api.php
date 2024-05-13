@@ -12,8 +12,6 @@ Route::post('/login-siswa', [UserController::class, 'loginSiswaAdmin']);
 Route::post('/register', [UserController::class, 'registerAdminSekolah']);
 Route::get('/item', [ItemController::class, 'index']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
-Route::get('/manage', [UserController::class, 'managePagination']);
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::post('/verify', [UserController::class, 'updateOrVerifySerialNumber']);
@@ -37,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin-sekolah/monitoring', [ProgressController::class, 'monitoringUserProgress']);
     Route::post('/admin-sekolah/siswa-import', [UserController::class, 'import_siswa_excel']);
     Route::get('/admin-sekolah', [UserController::class, 'indexAdminSekolah']);
+    Route::get('/admin-sekolah/kelas-jurusan-monitoring', [UserController::class, 'getKelasJurusanMonitoring']);
+    Route::get('/admin-sekolah/kelas-jurusan', [UserController::class, 'getKelasJurusan']);
     Route::prefix('admin-sekolah')->group(function (){
         Route::get('/{id}', [UserController::class, 'showUser']);
         Route::post('/post', [UserController::class, 'createSiswaAdminSekolah']);

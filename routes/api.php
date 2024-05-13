@@ -12,6 +12,7 @@ Route::post('/login-siswa', [UserController::class, 'loginSiswaAdmin']);
 Route::post('/register', [UserController::class, 'registerAdminSekolah']);
 Route::get('/item', [ItemController::class, 'index']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
+Route::get('/manage', [UserController::class, 'managePagination']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
@@ -56,4 +57,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [ItemController::class, 'putItem']);
     });
     Route::post('/pay', [PayController::class, 'pay']);
+    Route::get('/get-pay/{id}', [PayController::class, 'getPay']);
 });

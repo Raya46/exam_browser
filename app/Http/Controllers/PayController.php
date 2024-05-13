@@ -60,6 +60,7 @@ class PayController extends Controller
             return response()->json([
                 'status'     => 'success',
                 'snap_token' => $snapToken,
+                'pay_token' => $donation->order_id
             ]);
         } else {
             return response()->json([
@@ -93,7 +94,7 @@ class PayController extends Controller
             ]);
 
             foreach ($students as $index => $student) {
-                $studentToken = 'USR' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . strtoupper($admin_sekolah->sekolah);
+                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . $admin_sekolah->sekolah;
                 User::where('id', $student->id)->update([
                     'status' => 'active',
                     'token' => $studentToken,
@@ -108,7 +109,7 @@ class PayController extends Controller
             ]);
 
             foreach ($students as $index => $student) {
-                $studentToken = 'USR' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . strtoupper($admin_sekolah->sekolah);
+                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . $admin_sekolah->sekolah;
                 User::where('id', $student->id)->update([
                     'status' => 'active',
                     'token' => $studentToken,
@@ -137,6 +138,15 @@ class PayController extends Controller
         $pays = Pay::with('item', 'user')->get();
         return response()->json([
             'data' => $pays
+        ]);
+    }
+
+    public function getPay($pay_token)
+    {
+        $pay = Pay::where('order_id', $pay_token)->first();
+
+        return response()->json([
+            'data' => $pay->status
         ]);
     }
 }

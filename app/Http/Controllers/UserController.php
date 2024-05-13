@@ -7,6 +7,7 @@ use App\Imports\ImportSiswa;
 use App\Models\Pay;
 use App\Models\Progress;
 use App\Models\User;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -16,6 +17,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
+    const API_URL_ADMIN_SEKOLAH = "http://127.0.0.1:8000/api/admin-sekolah";
     public function postLogin(Request $request)
     {
         try {
@@ -185,7 +187,7 @@ class UserController extends Controller
     public function indexAdminSekolah()
     {
         $role = ['siswa', 'admin sekolah'];
-        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->get();
+        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->paginate(3);
         $token = Auth::user()->token;
 
         if (empty($token)) {
@@ -311,10 +313,11 @@ class UserController extends Controller
         $paid = Pay::whereHas('user', function ($query) use ($request) {
             $query->where('sekolah', strtoupper($request->sekolah));
         })->whereIn('status', $status_pay)->with('user')->latest()->first();
+        $order_id = Str::uuid()->toString();
 
         $token = NULL;
         if ($paid && $paid->user->sekolah == strtoupper($request->sekolah)) {
-            $token = 'ACT-' . Str::random(10);
+            $token = 'ACT-' . $order_id;
         }
         User::create([
             'name' => $request->name,

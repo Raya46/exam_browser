@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KelasJurusan;
 use App\Models\Link;
+use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,8 +13,8 @@ class LinkController extends Controller
     public function index()
     {
         $links = Link::with('progress')
-            ->where('sekolah', Auth::user()->sekolah)
-            ->where('kelas_jurusan', Auth::user()->kelas_jurusan)
+            ->where('sekolah_id', Auth::user()->sekolah_id)
+            ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id)
             ->whereDoesntHave('progress')
             ->get();
 
@@ -24,23 +26,26 @@ class LinkController extends Controller
 
     public function indexLinkAdmin()
     {
-        $links = Link::where('sekolah', Auth::user()->sekolah)->get();
-
+        $links = Link::with('kelasJurusan')->where('sekolah_id', Auth::user()->sekolah_id)->get();
+        $sekolah = Sekolah::where('id', Auth::user()->sekolah_id)->first();
         return response()->json([
             'data' => $links,
-            'user' => Auth::user()->sekolah
+            'sekolah' => $sekolah
         ], 200);
     }
 
 
     public function storeLink(Request $request)
     {
-
+        $kelasJurusan = KelasJurusan::firstOrCreate(
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id],
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id]
+        );
         Link::create([
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
-            'sekolah' => Auth::user()->sekolah,
-            'kelas_jurusan' => $request->kelas_jurusan,
+            'sekolah_id' => Auth::user()->sekolah_id,
+            'kelas_jurusan_id' => $kelasJurusan->id,
             'link_status' => 'active',
         ]);
 
@@ -73,11 +78,16 @@ class LinkController extends Controller
     {
         $link = Link::find($id);
 
+        $kelasJurusan = KelasJurusan::firstOrCreate(
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id],
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id]
+        );
+
         $link->update([
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
             'link_status' => $request->link_status,
-            'kelas_jurusan' => $request->kelas_jurusan
+            'kelas_jurusan_id' => $kelasJurusan->id
         ]);
 
         return response()->json([

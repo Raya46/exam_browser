@@ -69,9 +69,9 @@ class ProgressController extends Controller
     {
         $data = Progress::whereHas('user', function ($query) {
             $query->where('role', 'siswa')
-                ->where('sekolah', Auth::user()->sekolah)
+                ->where('sekolah_id', Auth::user()->sekolah_id)
                 ->where('user_id', Auth::user()->id)
-                ->where('kelas_jurusan', Auth::user()->kelas_jurusan);
+                ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id);
         })->with('link', 'user')->get();
 
         return response()->json([
@@ -83,14 +83,22 @@ class ProgressController extends Controller
     {
         $query = Progress::whereHas('user', function ($query) use ($request) {
             $query->where('role', 'siswa')
-                ->where('sekolah', Auth::user()->sekolah);
+                ->where('sekolah_id', Auth::user()->sekolah_id);
 
-            if ($request->filled('kelas_jurusan')) {
-                $query->where('kelas_jurusan', $request->kelas_jurusan);
+            if ($request->filled('kelas_jurusan_id')) {
+                $query->where('kelas_jurusan_id', $request->kelas_jurusan_id);
             }
         })->with('link', 'user');
 
-        $data = $query->paginate(3);
+        // Tambahkan filter untuk status_progress
+        if ($request->filled('status_progress')) {
+            $query->where('status_progress', $request->status_progress);
+        }
+
+        $data = $query->paginate(3)->appends([
+            'kelas_jurusan_id' => $request->kelas_jurusan_id,
+            'status_progress' => $request->status_progress
+        ]);
 
         return response()->json([
             'data' => $data

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\KelasJurusan;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -20,10 +21,13 @@ class ImportSiswa implements ToCollection
                 $data['name'] = !empty($row[0]) ? $row[0] : '';
                 $data['password'] = !empty($row[1]) ? bcrypt($row[1]) : '';
                 $data['token'] = !empty($row[2]) ? $row[2] : '';
-                $data['kelas_jurusan'] = !empty($row[3]) ? $row[3] : '';
+                $kelasJurusan = KelasJurusan::firstOrCreate(
+                    ['name' => $row[3], 'sekolah_id' => Auth::user()->sekolah_id],
+                    ['name' => $row[3], 'sekolah_id' => Auth::user()->sekolah_id]
+                );
+                $data['kelas_jurusan_id'] = $kelasJurusan->id;
                 $data['role'] = 'siswa';
-                $data['status'] = 'active';
-                $data['sekolah'] = Auth::user()->sekolah;
+                $data['sekolah_id'] = Auth::user()->sekolah_id;
                 User::create($data);
             }
             $index++;

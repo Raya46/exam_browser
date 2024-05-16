@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('links', function (Blueprint $table) {
+        Schema::create('kelas_jurusans', function (Blueprint $table) {
             $table->id();
-            $table->string('link_name');
-            $table->string('link_title');
+            $table->string('name');
             $table->foreignId('sekolah_id')->constrained('sekolahs')->onDelete('cascade');
-            $table->foreignId('kelas_jurusan_id')->constrained('kelas_jurusans')->onDelete('cascade');
-            $table->enum('link_status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('links');
+        Schema::dropIfExists('kelas_jurusans');
     }
 };

@@ -17,10 +17,9 @@ class User extends Authenticatable
         'password',
         'token',
         'role',
-        'kelas_jurusan',
-        'sekolah',
+        'kelas_jurusan_id',
+        'sekolah_id',
         'serial_number',
-        'status',
     ];
 
     protected $casts = [
@@ -36,9 +35,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pay::class);
     }
-
-    public function link()
+    public function sekolah()
     {
-        return $this->hasMany(Link::class);
+        return $this->belongsTo(Sekolah::class);
+    }
+    public function kelasJurusan()
+    {
+        return $this->belongsTo(kelasJurusan::class);
     }
 }

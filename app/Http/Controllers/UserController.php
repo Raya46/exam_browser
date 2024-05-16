@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exports\ExportSiswa;
 use App\Imports\ImportSiswa;
+use App\Models\KelasJurusan;
 use App\Models\Pay;
 use App\Models\Progress;
+use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,54 +18,24 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
-    const API_URL_ADMIN_SEKOLAH = "http://127.0.0.1:8000/api/admin-sekolah";
-    public function postLogin(Request $request)
+    public function loginAdmin(Request $request)
     {
-        try {
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'name' => 'required',
-                    'password' => 'required',
-                ]
-            );
+        $credentials = $request->validate([
+            'name' => 'required',
+            'password' => 'required',
+        ]);
 
-            if ($validateUser->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
-            }
-
-            if (!Auth::attempt($request->only(['name', 'password']))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'name & Password does not match with our record.',
-                ], 401);
-            }
-
-            $user = User::where('name', $request->name)->first();
-
-            if (Auth::user()->role == 'super admin') {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'super admin',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'admin sekolah',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
+
+        $user = User::where('name', $request->name)->first();
+        $token = $user->createToken("API TOKEN")->plainTextToken;
+
+        return response()->json([
+            'message' => $user->role === 'super admin' ? 'super admin' : 'admin sekolah',
+            'token' => $token
+        ]);
     }
 
     public function updateOrVerifySerialNumber(Request $request)
@@ -101,54 +73,23 @@ class UserController extends Controller
 
     public function loginSiswaAdmin(Request $request)
     {
-        try {
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'name' => 'required',
-                    'password' => 'required',
-                    'token' => 'required',
-                ]
-            );
+        $credentials = $request->validate([
+            'name' => 'required',
+            'password' => 'required',
+            'token' => 'required',
+        ]);
 
-            if ($validateUser->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
-            }
-
-            if (!Auth::attempt($request->only(['name', 'password', 'serial_number', 'token']))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'name & Password or serial number does not match with our record.',
-                ], 401);
-            }
-
-            $user = User::where('name', $request->name)->first();
-
-            if (Auth::user()->role == 'admin sekolah') {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'admin sekolah',
-                    'user' => $user,
-                    'token' => $user->createToken("API TOKEN")->plainTextToken
-                ], 200);
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'siswa',
-                'user' => $user,
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
+
+        $user = User::where('name', $request->name)->first();
+        $token = $user->createToken("API TOKEN")->plainTextToken;
+
+        return response()->json([
+            'message' => $user->role === 'admin sekolah' ? 'admin sekolah' : 'siswa',
+            'token' => $token
+        ]);
     }
 
 
@@ -170,10 +111,15 @@ class UserController extends Controller
         ]);
     }
 
-    public function indexAdminSekolah()
+    public function indexAdminSekolah(Request $request)
     {
         $role = ['siswa', 'admin sekolah'];
-        $data = User::whereIn('role', $role)->where('sekolah', Auth::user()->sekolah)->paginate(3);
+        $data = User::with('kelasJurusan')->whereIn('role', $role)
+            ->where('sekolah_id', Auth::user()->sekolah_id)
+            ->where('kelas_jurusan_id', $request->kelas_jurusan_id)
+            ->paginate(3)->appends([
+                'kelas_jurusan_id' => $request->kelas_jurusan_id
+            ]);
         $token = Auth::user()->token;
 
         if (empty($token)) {
@@ -219,9 +165,9 @@ class UserController extends Controller
     {
         $user = User::where('role', 'admin sekolah')->where('id', Auth::user()->id)->first();
         $status_pay = ['settlement', 'capture'];
-        $schoolUsersCount = User::where('sekolah', Auth::user()->sekolah)->count();
-        $paid = Pay::whereHas('user', function ($query) {
-            $query->where('sekolah', Auth::user()->sekolah);
+        $schoolUsersCount = User::where('sekolah_id', Auth::user()->sekolah_id)->count();
+        $paid = Pay::whereHas('user', function ($query) use ($user) {
+            $query->where('sekolah_id', $user->sekolah_id);
         })->whereIn('status', $status_pay)->with('item')->latest()->first();
 
         if ($schoolUsersCount >= $paid->item->user_quantity) {
@@ -233,9 +179,9 @@ class UserController extends Controller
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'token' => 'usr-'. $request->token . '-' . $user->sekolah,
-            'sekolah' => $user->sekolah,
-            'kelas_jurusan' => $request->kelas_jurusan
+            'token' => 'usr-' . $request->token . '-' . $user->sekolah,
+            'sekolah_id' => $user->sekolah_id,
+            'kelas_jurusan_id' => $request->kelas_jurusan_id
         ]);
 
         return response()->json([
@@ -265,7 +211,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'token' => $request->token,
                 'role' => $request->role,
-                'kelas_jurusan' => $request->kelas_jurusan
+                'kelas_jurusan_id' => $request->kelas_jurusan_id
             ]);
             return response()->json([
                 'data' => 'success'
@@ -276,7 +222,7 @@ class UserController extends Controller
                 'password' => $request->password,
                 'token' => $request->token,
                 'role' => $request->role,
-                'kelas_jurusan' => $request->kelas_jurusan
+                'kelas_jurusan_id' => $request->kelas_jurusan_id
             ]);
             return response()->json([
                 'data' => 'success'
@@ -293,47 +239,74 @@ class UserController extends Controller
         ]);
     }
 
-    public function registerAdminSekolah(Request $request)
+    public function register(Request $request)
     {
-        $status_pay = ['settlement', 'capture'];
-        $paid = Pay::whereHas('user', function ($query) use ($request) {
-            $query->where('sekolah', $request->sekolah);
-        })->whereIn('status', $status_pay)->with('user')->latest()->first();
-        $order_id = Str::uuid()->toString();
+        $request->validate([
+            'name' => 'required|string|email|max:255|unique:users,name',
+            'role' => 'required|string|max:255',
+            'password' => 'required|string',
+            'sekolah' => 'required|string|max:255',
+            'kelas_jurusan' => 'required|string|max:255',
+        ]);
+        $sekolah = Sekolah::firstOrCreate(
+            ['name' => $request->sekolah],
+            ['name' => $request->sekolah] // Values to insert if the school does not exist
+        );
+        $kelasJurusan = KelasJurusan::firstOrCreate(
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id],
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id]
+        );
+        if ($request->role == 'admin sekolah') {
+            $status_pay = ['settlement', 'capture'];
+            $paid = Pay::whereHas('user', function ($query) {
+                $query->where('sekolah_id', Auth::user()->sekolah_id);
+            })->whereIn('status', $status_pay)->with('user')->latest()->first();
+            $order_id = Str::uuid()->toString();
 
-        $token = NULL;
-        if ($paid && $paid->user->sekolah == $request->sekolah) {
-            $token = 'ACT-' . $order_id;
+            $token = NULL;
+            if ($paid && $paid->user->sekolah_id == Auth::user()->sekolah_id) {
+                $token = 'ACT-' . $order_id;
+            }
+            User::create([
+                'name' => $request->name,
+                'role' => 'admin sekolah',
+                'password' => $request->password,
+                'sekolah_id' => $sekolah->id,
+                'token' => $token, // Gunakan token yang telah dibuat
+                'kelas_jurusan_id' => $kelasJurusan->id
+            ]);
         }
         User::create([
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'sekolah' => $request->sekolah,
-            'token' => $token, // Gunakan token yang telah dibuat
-            'kelas_jurusan' => $request->kelas_jurusan
+            'sekolah_id' => $sekolah->id,
+            'kelas_jurusan_id' => $kelasJurusan->id
         ]);
-
-        return response()->json([
-            'data' => 'success'
-        ]);
-    }
-
-    public function getKelasJurusanMonitoring()
-    {
-        $kelasJurusan = User::distinct()->where('sekolah', Auth::user()->sekolah)->get(['kelas_jurusan']); // Mengambil semua kelas_jurusan yang unik
-
-        return response()->json([
-            'data' => $kelasJurusan
-        ]);
+        return response()->json(['data' => 'success']);
     }
 
     public function getKelasJurusan()
     {
-        $kelasJurusan = User::distinct()->get(['kelas_jurusan']); // Mengambil semua kelas_jurusan yang unik
+        $kelasJurusan = KelasJurusan::distinct()->where('name', '!=', 'SUPER ADMIN')->get();
 
         return response()->json([
             'data' => $kelasJurusan
+        ]);
+    }
+    public function getKelasJurusanLog()
+    {
+        $kelasJurusan = KelasJurusan::distinct()->where('name', '!=', 'SUPER ADMIN')->where('sekolah_id', Auth::user()->sekolah_id)->get();
+        return response()->json([
+            'data' => $kelasJurusan
+        ]);
+    }
+    public function getSekolah()
+    {
+        $sekolah = Sekolah::where('name', '!=', 'SUPER ADMIN')->get();
+
+        return response()->json([
+            'data' => $sekolah
         ]);
     }
 }

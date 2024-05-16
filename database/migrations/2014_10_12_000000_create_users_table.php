@@ -17,10 +17,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('token')->nullable();
             $table->enum('role', ['super admin', 'admin sekolah', 'siswa']);
-            $table->string('kelas_jurusan')->nullable();
-            $table->string('sekolah')->nullable();
+            $table->foreignId('kelas_jurusan_id')->constrained('kelas_jurusans')->onDelete('cascade');
+            $table->foreignId('sekolah_id')->constrained('sekolahs')->onDelete('cascade');
             $table->string('serial_number')->nullable()->unique();
-            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

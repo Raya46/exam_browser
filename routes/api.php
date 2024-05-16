@@ -4,14 +4,18 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\PayController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\KelasJurusanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [UserController::class, 'postLogin']);
+Route::post('/login', [UserController::class, 'loginAdmin']);
 Route::post('/login-siswa', [UserController::class, 'loginSiswaAdmin']);
-Route::post('/register', [UserController::class, 'registerAdminSekolah']);
+Route::post('/register', [UserController::class, 'register']);
 Route::get('/item', [ItemController::class, 'index']);
+Route::get('/sekolah', [UserController::class, 'getSekolah']);
+Route::get('/kelas-jurusan', [UserController::class, 'getKelasJurusan']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::post('/verify', [UserController::class, 'updateOrVerifySerialNumber']);
@@ -35,8 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin-sekolah/monitoring', [ProgressController::class, 'monitoringUserProgress']);
     Route::post('/admin-sekolah/siswa-import', [UserController::class, 'import_siswa_excel']);
     Route::get('/admin-sekolah', [UserController::class, 'indexAdminSekolah']);
-    Route::get('/admin-sekolah/kelas-jurusan-monitoring', [UserController::class, 'getKelasJurusanMonitoring']);
-    Route::get('/admin-sekolah/kelas-jurusan', [UserController::class, 'getKelasJurusan']);
+    Route::get('/admin-sekolah/kelas-jurusan', [UserController::class, 'getKelasJurusanLog']);
     Route::prefix('admin-sekolah')->group(function (){
         Route::get('/{id}', [UserController::class, 'showUser']);
         Route::post('/post', [UserController::class, 'createSiswaAdminSekolah']);
@@ -58,4 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/pay', [PayController::class, 'pay']);
     Route::get('/get-pay/{id}', [PayController::class, 'getPay']);
+    Route::post('/post-kelas', [KelasJurusanController::class, 'store']);
+    Route::get('/get-kelas', [KelasJurusanController::class, 'index']);
+    Route::get('/get-kelas/{id}', [KelasJurusanController::class, 'show']);
+    Route::put('/update-kelas/{id}', [KelasJurusanController::class, 'updateKelasJurusan']);
+    Route::delete('/delete-kelas/{id}', [KelasJurusanController::class, 'destroy']);
 });

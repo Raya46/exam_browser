@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('progress', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('link_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('link_id')->constrained('links')->onDelete('cascade');
             $table->double('nilai')->nullable();
             $table->enum('status_progress', ['belum dikerjakan', 'dikerjakan', 'selesai', 'keluar', 'split screen'])->default('belum dikerjakan');
             $table->timestamps();

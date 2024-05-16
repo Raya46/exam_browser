@@ -12,8 +12,8 @@ class Link extends Model
     protected $fillable =[
         'link_name',
         'link_title',
-        'sekolah',
-        'kelas_jurusan',
+        'sekolah_id',
+        'kelas_jurusan_id',
         'link_status',
     ];
 
@@ -21,9 +21,12 @@ class Link extends Model
     {
         return $this->hasMany(Progress::class);
     }
-
-    public function user()
+    public function sekolah()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Sekolah::class);
+    }
+    public function kelasJurusan()
+    {
+        return $this->belongsTo(KelasJurusan::class);
     }
 }

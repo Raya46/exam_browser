@@ -80,7 +80,7 @@ class PayController extends Controller
         $response = json_decode($response->body());
         $pay = Pay::where('order_id', $response->order_id)->first();
         $admin_sekolah = User::where('role', 'admin sekolah')->where('id', $pay->user_id)->first();
-        $students = User::where('role', 'siswa')->where('sekolah', $admin_sekolah->sekolah)->get();
+        $students = User::where('role', 'siswa')->where('sekolah_id', $admin_sekolah->sekolah_id)->get();
         $lastOrderNumber = Pay::where('user_id', $admin_sekolah->id)->max('id');
         $lastOrderNumber = (int) substr($lastOrderNumber, 4, 3);
         $newOrderNumber = $lastOrderNumber + 1;
@@ -89,14 +89,12 @@ class PayController extends Controller
         if ($response->transaction_status == 'capture') {
             $pay->status = 'capture';
             User::where('role', 'admin sekolah')->where('id', $pay->user_id)->update([
-                'status' => 'active',
                 'token' => $pay->order_id,
             ]);
 
             foreach ($students as $index => $student) {
-                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . $admin_sekolah->sekolah;
+                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . str_replace(' ','-',$admin_sekolah->sekolah->name);
                 User::where('id', $student->id)->update([
-                    'status' => 'active',
                     'token' => $studentToken,
                 ]);
             }
@@ -104,14 +102,12 @@ class PayController extends Controller
         if ($response->transaction_status == 'settlement') {
             $pay->status = 'settlement';
             User::where('role', 'admin sekolah')->where('id', $pay->user_id)->update([
-                'status' => 'active',
                 'token' => $pay->order_id,
             ]);
 
             foreach ($students as $index => $student) {
-                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . $admin_sekolah->sekolah;
+                $studentToken = 'usr' . '-' . sprintf('%03d', $newOrderNumber + $index) . '-' . str_replace(' ','-',$admin_sekolah->sekolah->name);
                 User::where('id', $student->id)->update([
-                    'status' => 'active',
                     'token' => $studentToken,
                 ]);
             }

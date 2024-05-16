@@ -13,7 +13,8 @@ class ExportSiswa implements FromCollection
     */
     public function collection()
     {
-        return User::select('name', 'kelas_jurusan', 'nilai')->where('role', 'siswa')->where('sekolah', Auth::user()->sekolah)->get();
+        $user = User::select('name')->with('kelasJurusan')->where('role', 'siswa')->where('sekolah_id', Auth::user()->sekolah_id)->get();
+        return $user;
     }
 
     public function headings(): array
@@ -21,7 +22,6 @@ class ExportSiswa implements FromCollection
         return [
             'Name',
             'Kelas & Jurusan',
-            'Nilai'
         ];
     }
 
@@ -29,8 +29,7 @@ class ExportSiswa implements FromCollection
     {
         return [
             $user->name,
-            $user->kelas_jurusan,
-            $user->nilai
+            $user->kelasJurusan->name,
         ];
     }
 }

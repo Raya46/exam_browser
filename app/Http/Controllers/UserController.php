@@ -163,6 +163,10 @@ class UserController extends Controller
 
     public function createSiswaAdminSekolah(Request $request)
     {
+        $kelasJurusan = KelasJurusan::firstOrCreate(
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id],
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id]
+        );
         $user = User::where('role', 'admin sekolah')->where('id', Auth::user()->id)->first();
         $status_pay = ['settlement', 'capture'];
         $schoolUsersCount = User::where('sekolah_id', Auth::user()->sekolah_id)->count();
@@ -179,9 +183,9 @@ class UserController extends Controller
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'token' => 'usr-' . $request->token . '-' . $user->sekolah,
+            'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
             'sekolah_id' => $user->sekolah_id,
-            'kelas_jurusan_id' => $request->kelas_jurusan_id
+            'kelas_jurusan_id' => $kelasJurusan->id
         ]);
 
         return response()->json([
@@ -205,13 +209,16 @@ class UserController extends Controller
     {
         $role = ['siswa', 'admin sekolah'];
         $user = User::whereIn('role', $role)->find($id);
-
+        $kelasJurusan = KelasJurusan::firstOrCreate(
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id],
+            ['name' => $request->kelas_jurusan, 'sekolah_id' => Auth::user()->sekolah_id]
+        );
         if ($request->password == null || $request->password == "") {
             $user->update([
                 'name' => $request->name,
-                'token' => $request->token,
+                'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
                 'role' => $request->role,
-                'kelas_jurusan_id' => $request->kelas_jurusan_id
+                'kelas_jurusan_id' => $kelasJurusan->id
             ]);
             return response()->json([
                 'data' => 'success'
@@ -220,9 +227,9 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->name,
                 'password' => $request->password,
-                'token' => $request->token,
+                'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
                 'role' => $request->role,
-                'kelas_jurusan_id' => $request->kelas_jurusan_id
+                'kelas_jurusan_id' => $kelasJurusan->id
             ]);
             return response()->json([
                 'data' => 'success'
@@ -248,41 +255,25 @@ class UserController extends Controller
             'sekolah' => 'required|string|max:255',
             'kelas_jurusan' => 'required|string|max:255',
         ]);
+
         $sekolah = Sekolah::firstOrCreate(
             ['name' => $request->sekolah],
-            ['name' => $request->sekolah] // Values to insert if the school does not exist
+            ['name' => $request->sekolah]
         );
+
         $kelasJurusan = KelasJurusan::firstOrCreate(
             ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id],
             ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id]
         );
-        if ($request->role == 'admin sekolah') {
-            $status_pay = ['settlement', 'capture'];
-            $paid = Pay::whereHas('user', function ($query) {
-                $query->where('sekolah_id', Auth::user()->sekolah_id);
-            })->whereIn('status', $status_pay)->with('user')->latest()->first();
-            $order_id = Str::uuid()->toString();
 
-            $token = NULL;
-            if ($paid && $paid->user->sekolah_id == Auth::user()->sekolah_id) {
-                $token = 'ACT-' . $order_id;
-            }
-            User::create([
-                'name' => $request->name,
-                'role' => 'admin sekolah',
-                'password' => $request->password,
-                'sekolah_id' => $sekolah->id,
-                'token' => $token, // Gunakan token yang telah dibuat
-                'kelas_jurusan_id' => $kelasJurusan->id
-            ]);
-        }
         User::create([
             'name' => $request->name,
             'role' => $request->role,
-            'password' => $request->password,
+            'password' => bcrypt($request->password), // Pastikan password di-hash
             'sekolah_id' => $sekolah->id,
             'kelas_jurusan_id' => $kelasJurusan->id
         ]);
+
         return response()->json(['data' => 'success']);
     }
 

@@ -16,11 +16,13 @@ class LinkController extends Controller
             ->where('sekolah_id', Auth::user()->sekolah_id)
             ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id)
             ->whereDoesntHave('progress')
+            ->orWhereHas('progress', function ($query) {
+                $query->where('status_progress', 'belum dikerjakan');
+            })
             ->get();
 
         return response()->json([
             'data' => $links,
-            'user' => Auth::user()->sekolah
         ], 200);
     }
 
@@ -46,7 +48,10 @@ class LinkController extends Controller
             'link_title' => $request->link_title,
             'sekolah_id' => Auth::user()->sekolah_id,
             'kelas_jurusan_id' => $kelasJurusan->id,
-            'link_status' => 'active',
+            'link_status' => $request->link_status,
+            'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            'waktu_pengerjaan_mulai' => $request->waktu_pengerjaan_mulai,
+            'waktu_pengerjaan_selesai' => $request->waktu_pengerjaan_selesai
         ]);
 
         return response()->json([
@@ -87,7 +92,10 @@ class LinkController extends Controller
             'link_name' => $request->link_name,
             'link_title' => $request->link_title,
             'link_status' => $request->link_status,
-            'kelas_jurusan_id' => $kelasJurusan->id
+            'kelas_jurusan_id' => $kelasJurusan->id,
+            'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            'waktu_pengerjaan_mulai' => $request->waktu_pengerjaan_mulai,
+            'waktu_pengerjaan_selesai' => $request->waktu_pengerjaan_selesai
         ]);
 
         return response()->json([

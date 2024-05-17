@@ -6,9 +6,28 @@ use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ProgressController extends Controller
 {
+    public function updateProgressStatus()
+    {
+        $currentTime = Carbon::now('Asia/Jakarta');
+        $sekolahId = Auth::user()->sekolah_id;
+
+        Progress::whereHas('link', function ($query) use ($currentTime) {
+            $query->where('waktu_pengerjaan_selesai', '<=', $currentTime);
+        })
+            ->where('status_progress', '!=', 'selesai')
+            ->whereHas('user', function ($query) use ($sekolahId) {
+                $query->where('sekolah_id', $sekolahId);
+            })
+            ->update(['status_progress' => 'selesai']);
+
+        return response()->json([
+            'message' => 'Progress status updated successfully'
+        ]);
+    }
     public function createOrUpdateProgress(Request $request)
     {
         $user = User::where('role', 'siswa')->where('id', Auth::user()->id)->first();
@@ -70,9 +89,11 @@ class ProgressController extends Controller
         $data = Progress::whereHas('user', function ($query) {
             $query->where('role', 'siswa')
                 ->where('sekolah_id', Auth::user()->sekolah_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('id', Auth::user()->id)
                 ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id);
-        })->with('link', 'user')->get();
+        })->where('status_progress', '!=', 'belum dikerjakan')
+            ->with('link', 'user')
+            ->get();
 
         return response()->json([
             'data' => $data

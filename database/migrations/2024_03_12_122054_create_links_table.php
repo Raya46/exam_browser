@@ -18,6 +18,9 @@ return new class extends Migration
             $table->foreignId('sekolah_id')->constrained('sekolahs')->onDelete('cascade');
             $table->foreignId('kelas_jurusan_id')->constrained('kelas_jurusans')->onDelete('cascade');
             $table->enum('link_status', ['active', 'inactive'])->default('active');
+            $table->integer('waktu_pengerjaan');
+            $table->timestamp('waktu_pengerjaan_mulai')->nullable();
+            $table->timestamp('waktu_pengerjaan_selesai')->nullable();
             $table->timestamps();
         });
     }

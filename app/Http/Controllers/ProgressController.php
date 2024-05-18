@@ -14,11 +14,12 @@ class ProgressController extends Controller
     public function updateStatusByTime()
     {
         $currentTime = Carbon::now();
+        Link::where('waktu_pengerjaan_mulai', '<=', $currentTime)->where('link_status', 'inactive')->update(['link_status' => 'active']);
         Progress::whereHas('link', function ($query) use ($currentTime) {
             $query->where('waktu_pengerjaan_selesai', '<=', $currentTime);
         })->where('status_progress', 'dikerjakan')->update(['status_progress' => 'selesai']);
         return response()->json([
-            'message' => 'Progress status updated successfully'
+            'message' => 'Progress status & link_status updated successfully'
         ]);
     }
     public function createOrUpdateProgress(Request $request)

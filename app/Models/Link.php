@@ -15,7 +15,9 @@ class Link extends Model
         'sekolah_id',
         'kelas_jurusan_id',
         'link_status',
-        'waktu_pengerjaan'
+        'waktu_pengerjaan',
+        'waktu_pengerjaan_mulai',
+        'waktu_pengerjaan_selesai',
     ];
 
     public function progress()

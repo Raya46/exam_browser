@@ -213,7 +213,7 @@ class UserController extends Controller
         if ($request->password == null || $request->password == "") {
             $user->update([
                 'name' => $request->name,
-                'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
+                'token' => $request->token. '-' . $user->sekolah->name,
                 'role' => $request->role,
                 'kelas_jurusan_id' => $kelasJurusan->id
             ]);
@@ -224,7 +224,7 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->name,
                 'password' => $request->password,
-                'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
+                'token' => $request->token . '-' . $user->sekolah->name,
                 'role' => $request->role,
                 'kelas_jurusan_id' => $kelasJurusan->id
             ]);

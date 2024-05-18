@@ -13,8 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            app('App\Http\Controllers\ProgressController')->updateProgressStatus();
-        })->everyTwoHours();
+            app('App\Http\Controllers\ProgressController')->updateStatusByTime();
+        })->everyTenMinutes();
     }
 
     /**

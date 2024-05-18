@@ -6,14 +6,11 @@ use App\Exports\ExportSiswa;
 use App\Imports\ImportSiswa;
 use App\Models\KelasJurusan;
 use App\Models\Pay;
-use App\Models\Progress;
 use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller

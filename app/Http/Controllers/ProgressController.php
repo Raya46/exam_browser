@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Link;
 use App\Models\Progress;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,20 +11,12 @@ use Carbon\Carbon;
 
 class ProgressController extends Controller
 {
-    public function updateProgressStatus()
+    public function updateStatusByTime()
     {
-        $currentTime = Carbon::now('Asia/Jakarta');
-        $sekolahId = Auth::user()->sekolah_id;
-
+        $currentTime = Carbon::now();
         Progress::whereHas('link', function ($query) use ($currentTime) {
             $query->where('waktu_pengerjaan_selesai', '<=', $currentTime);
-        })
-            ->where('status_progress', '!=', 'selesai')
-            ->whereHas('user', function ($query) use ($sekolahId) {
-                $query->where('sekolah_id', $sekolahId);
-            })
-            ->update(['status_progress' => 'selesai']);
-
+        })->where('status_progress', 'dikerjakan')->update(['status_progress' => 'selesai']);
         return response()->json([
             'message' => 'Progress status updated successfully'
         ]);

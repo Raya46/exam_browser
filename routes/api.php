@@ -14,6 +14,7 @@ Route::post('/register', [UserController::class, 'register']);
 Route::get('/item', [ItemController::class, 'index']);
 Route::get('/sekolah', [UserController::class, 'getSekolah']);
 Route::get('/kelas-jurusan', [UserController::class, 'getKelasJurusan']);
+Route::put('/update-status', [ProgressController::class, 'updateStatusByTime']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
 
 Route::middleware('auth:sanctum')->group(function () {

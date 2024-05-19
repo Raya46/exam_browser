@@ -12,12 +12,10 @@ class LinkController extends Controller
 {
     public function index()
     {
-        $links = Link::with('progress')
-            ->where('sekolah_id', Auth::user()->sekolah_id)
+        $links = Link::where('sekolah_id', Auth::user()->sekolah_id)
             ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id)
-            ->whereDoesntHave('progress')
-            ->orWhereHas('progress', function ($query) {
-                $query->where('status_progress', 'belum dikerjakan');
+            ->whereHas('progress', function ($query) {
+                $query->where('status_progress', 'belum dikerjakan')->where('user_id', Auth::user()->id);
             })
             ->get();
 

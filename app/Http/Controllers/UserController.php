@@ -99,6 +99,16 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function getDataLoggedIn(){
+        $user = User::where('id', Auth::user()->id)->first();
+        return response()->json([
+            'name' => Auth::user()->name,
+            'kelas_jurusan' => $user->kelasJurusan->name,
+            'sekolah' => $user->sekolah->name,
+            'role' => Auth::user()->role,
+        ]);
+    }
+
     public function indexSuperAdmin()
     {
         $data = User::where('role', 'admin sekolah')->get();

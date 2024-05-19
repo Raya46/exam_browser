@@ -20,6 +20,7 @@ Route::post('/pay/hook', [PayController::class, 'webhook']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::post('/verify', [UserController::class, 'updateOrVerifySerialNumber']);
+    Route::get('/get-data-login', [UserController::class, 'getDataLoggedIn']);
     Route::get('/links', [LinkController::class, 'index']);
     Route::post('/links/post', [LinkController::class, 'storeLink']);
     Route::prefix('links')->group(function (){

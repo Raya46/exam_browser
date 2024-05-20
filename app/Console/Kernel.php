@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function () {
             app('App\Http\Controllers\ProgressController')->updateStatusByTime();
-        })->everyTenMinutes();
+        })->everyThirtyMinutes();
     }
 
     /**

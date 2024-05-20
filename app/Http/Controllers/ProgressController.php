@@ -18,9 +18,6 @@ class ProgressController extends Controller
         Progress::whereHas('link', function ($query) use ($currentTime) {
             $query->where('waktu_pengerjaan_selesai', '<=', $currentTime);
         })->where('status_progress', 'dikerjakan')->update(['status_progress' => 'selesai']);
-        return response()->json([
-            'message' => 'Progress status & link_status updated successfully'
-        ]);
     }
     public function createOrUpdateProgress(Request $request)
     {

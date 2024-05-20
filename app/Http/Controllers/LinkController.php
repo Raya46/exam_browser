@@ -11,18 +11,27 @@ use Illuminate\Support\Facades\Auth;
 class LinkController extends Controller
 {
     public function index()
-    {
-        $links = Link::where('sekolah_id', Auth::user()->sekolah_id)
-            ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id)
-            ->whereHas('progress', function ($query) {
-                $query->where('status_progress', 'belum dikerjakan')->where('user_id', Auth::user()->id);
-            })
-            ->get();
+{
+    $userId = Auth::user()->id;
+    $sekolahId = Auth::user()->sekolah_id;
+    $kelasJurusanId = Auth::user()->kelas_jurusan_id;
 
-        return response()->json([
-            'data' => $links,
-        ], 200);
-    }
+    $links = Link::where('sekolah_id', $sekolahId)
+        ->where('kelas_jurusan_id', $kelasJurusanId)
+        ->where(function ($query) use ($userId) {
+            $query->whereDoesntHave('progress')
+                  ->orWhereHas('progress', function ($query) use ($userId) {
+                      $query->where('status_progress', 'belum dikerjakan')
+                            ->where('user_id', $userId);
+                  });
+        })
+        ->get();
+
+    return response()->json([
+        'data' => $links,
+    ], 200);
+}
+
 
     public function indexLinkAdmin()
     {

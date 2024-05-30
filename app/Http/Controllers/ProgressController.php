@@ -44,14 +44,10 @@ class ProgressController extends Controller
         }
     }
 
-    public function progressUser(Request $request)
+    public function progressUser(Request $request, $id)
     {
-        $progress = Progress::where('user_id', Auth::user()->id)->where('link_id', $request->link_id)->first();
-        $user = User::where('role', 'siswa')->where('id', Auth::user()->id)->first();
-
+        $progress = Progress::where('user_id', Auth::user()->id)->where('link_id', $id)->first();
         $progress->update([
-            'user_id' => $user->id,
-            'link_id' => $request->link_id,
             'status_progress' => $request->status_progress
         ]);
 
@@ -65,8 +61,6 @@ class ProgressController extends Controller
         $progress = Progress::find($id);
 
         $progress->update([
-            'user_id' => $request->user_id,
-            'link_id' => $request->link_id,
             'status_progress' => $request->status_progress
         ]);
 
@@ -107,7 +101,7 @@ class ProgressController extends Controller
             $query->where('status_progress', $request->status_progress);
         }
 
-        $data = $query->paginate(3)->appends([
+        $data = $query->paginate(5)->appends([
             'kelas_jurusan_id' => $request->kelas_jurusan_id,
             'status_progress' => $request->status_progress
         ]);
@@ -119,7 +113,7 @@ class ProgressController extends Controller
 
     public function show($id)
     {
-        $progress = Progress::with('link', 'user')->where('id', $id)->first();
+        $progress = Progress::where('user_id', Auth::user()->id)->where('link_id', $id)->first();
 
         return response()->json([
             'data' => $progress

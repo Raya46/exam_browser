@@ -5,33 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\KelasJurusan;
 use App\Models\Link;
 use App\Models\Sekolah;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LinkController extends Controller
 {
     public function index()
-{
-    $userId = Auth::user()->id;
-    $sekolahId = Auth::user()->sekolah_id;
-    $kelasJurusanId = Auth::user()->kelas_jurusan_id;
+    {
+        $userId = Auth::user()->id;
+        $sekolahId = Auth::user()->sekolah_id;
+        $kelasJurusanId = Auth::user()->kelas_jurusan_id;
 
-    $links = Link::where('sekolah_id', $sekolahId)
-        ->where('kelas_jurusan_id', $kelasJurusanId)
-        ->where(function ($query) use ($userId) {
-            $query->whereDoesntHave('progress')
-                  ->orWhereHas('progress', function ($query) use ($userId) {
-                      $query->where('status_progress', 'belum dikerjakan')
-                            ->where('user_id', $userId);
-                  });
-        })
-        ->get();
+        $links = Link::where('sekolah_id', $sekolahId)
+            ->where('kelas_jurusan_id', $kelasJurusanId)
+            ->where(function ($query) use ($userId) {
+                $query->whereDoesntHave('progress', function ($subQuery) use ($userId) {
+                    $subQuery->where('user_id', $userId);
+                })
+                    ->orWhereHas('progress', function ($subQuery) use ($userId) {
+                        $subQuery->where('user_id', $userId)
+                            ->where('status_progress', 'belum dikerjakan');
+                    });
+            })
+            ->get();
 
-    return response()->json([
-        'data' => $links,
-    ], 200);
-}
-
+        return response()->json([
+            'data' => $links,
+        ], 200);
+    }
 
     public function indexLinkAdmin()
     {
@@ -57,8 +59,8 @@ class LinkController extends Controller
             'kelas_jurusan_id' => $kelasJurusan->id,
             'link_status' => $request->link_status,
             'waktu_pengerjaan' => $request->waktu_pengerjaan,
-            'waktu_pengerjaan_mulai' => $request->waktu_pengerjaan_mulai,
-            'waktu_pengerjaan_selesai' => $request->waktu_pengerjaan_selesai
+            'waktu_pengerjaan_mulai' => Carbon::parse($request->waktu_pengerjaan_mulai)->setTimezone('Asia/Jakarta'),
+            'waktu_pengerjaan_selesai' => Carbon::parse($request->waktu_pengerjaan_selesai)->setTimezone('Asia/Jakarta')
         ]);
 
         return response()->json([
@@ -101,8 +103,8 @@ class LinkController extends Controller
             'link_status' => $request->link_status,
             'kelas_jurusan_id' => $kelasJurusan->id,
             'waktu_pengerjaan' => $request->waktu_pengerjaan,
-            'waktu_pengerjaan_mulai' => $request->waktu_pengerjaan_mulai,
-            'waktu_pengerjaan_selesai' => $request->waktu_pengerjaan_selesai
+            'waktu_pengerjaan_mulai' => Carbon::parse($request->waktu_pengerjaan_mulai)->setTimezone('Asia/Jakarta'),
+            'waktu_pengerjaan_selesai' => Carbon::parse($request->waktu_pengerjaan_selesai)->setTimezone('Asia/Jakarta')
         ]);
 
         return response()->json([

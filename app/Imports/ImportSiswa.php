@@ -16,11 +16,19 @@ class ImportSiswa implements ToCollection
     public function collection(Collection $rows)
     {
         $index = 1;
+        $userSekolahName = Auth::user()->sekolah->name;
+
         foreach ($rows as $row) {
             if ($index > 1) {
+                $token = !empty($row[2]) ? $row[2] : '';
+
+                if (strpos($token, $userSekolahName) === false) {
+                    throw new \Exception('Token must contain the name of the school');
+                }
+
                 $data['name'] = !empty($row[0]) ? $row[0] : '';
                 $data['password'] = !empty($row[1]) ? bcrypt($row[1]) : '';
-                $data['token'] = !empty($row[2]) ? $row[2] : '';
+                $data['token'] = $token;
                 $kelasJurusan = KelasJurusan::firstOrCreate(
                     ['name' => $row[3], 'sekolah_id' => Auth::user()->sekolah_id],
                     ['name' => $row[3], 'sekolah_id' => Auth::user()->sekolah_id]
@@ -32,5 +40,7 @@ class ImportSiswa implements ToCollection
             }
             $index++;
         }
+
+        return response()->json(['success' => 'Data imported successfully'], 200);
     }
 }

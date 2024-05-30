@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [UserController::class, 'updateSiswaAdminSekolah']);
     });
     Route::get('/progress', [ProgressController::class, 'userProgress']);
-    Route::put('/progress/user', [ProgressController::class, 'progressUser']);
+    Route::put('/progress/user/{id}', [ProgressController::class, 'progressUser']);
     Route::prefix('progress')->group(function (){
         Route::get('/{id}', [ProgressController::class, 'show']);
         Route::post('/post', [ProgressController::class, 'createOrUpdateProgress']);

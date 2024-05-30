@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -99,7 +101,8 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getDataLoggedIn(){
+    public function getDataLoggedIn()
+    {
         $user = User::where('id', Auth::user()->id)->first();
         return response()->json([
             'name' => Auth::user()->name,
@@ -124,7 +127,7 @@ class UserController extends Controller
         $data = User::with('kelasJurusan')->whereIn('role', $role)
             ->where('sekolah_id', Auth::user()->sekolah_id)
             ->where('kelas_jurusan_id', $request->kelas_jurusan_id)
-            ->paginate(3)->appends([
+            ->paginate(5)->appends([
                 'kelas_jurusan_id' => $request->kelas_jurusan_id
             ]);
         $token = Auth::user()->token;
@@ -190,7 +193,7 @@ class UserController extends Controller
             'name' => $request->name,
             'role' => $request->role,
             'password' => $request->password,
-            'token' => $request->token1 . '-' . $request->token2 . '-' . $user->sekolah->name,
+            'token' => $request->token . '-' . $user->sekolah->name,
             'sekolah_id' => $user->sekolah_id,
             'kelas_jurusan_id' => $kelasJurusan->id
         ]);
@@ -223,7 +226,7 @@ class UserController extends Controller
         if ($request->password == null || $request->password == "") {
             $user->update([
                 'name' => $request->name,
-                'token' => $request->token. '-' . $user->sekolah->name,
+                'token' => $request->token . '-' . $user->sekolah->name,
                 'role' => $request->role,
                 'kelas_jurusan_id' => $kelasJurusan->id
             ]);
@@ -255,50 +258,85 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|email|max:255|unique:users,name',
-            'role' => 'required|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'role' => 'required|string',
             'password' => 'required|string',
-            'sekolah' => 'required|string|max:255',
-            'kelas_jurusan' => 'required|string|max:255',
+            'sekolah' => 'required|string',
+            'kelas_jurusan' => 'required|string',
         ]);
 
-        $sekolah = Sekolah::firstOrCreate(
-            ['name' => $request->sekolah],
-            ['name' => $request->sekolah]
-        );
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-        $kelasJurusan = KelasJurusan::firstOrCreate(
-            ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id],
-            ['name' => $request->kelas_jurusan, 'sekolah_id' => $sekolah->id]
-        );
+        try {
+            $sekolah = Sekolah::firstOrCreate(
+                ['name' => $request->sekolah],
+                ['name' => $request->sekolah]
+            );
 
-        User::create([
-            'name' => $request->name,
-            'role' => $request->role,
-            'password' => bcrypt($request->password), // Pastikan password di-hash
-            'sekolah_id' => $sekolah->id,
-            'kelas_jurusan_id' => $kelasJurusan->id
-        ]);
+            $kelasJurusanName = explode(' - ', $request->kelas_jurusan)[0];
+            $kelasJurusan = KelasJurusan::firstOrCreate(
+                ['name' => $kelasJurusanName, 'sekolah_id' => $sekolah->id],
+                ['name' => $kelasJurusanName, 'sekolah_id' => $sekolah->id]
+            );
 
-        return response()->json(['data' => 'success']);
+            User::create([
+                'name' => $request->name,
+                'role' => $request->role,
+                'password' => bcrypt($request->password),
+                'sekolah_id' => $sekolah->id,
+                'kelas_jurusan_id' => $kelasJurusan->id
+            ]);
+
+            return response()->json(['data' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
 
     public function getKelasJurusan()
     {
-        $kelasJurusan = KelasJurusan::distinct()->where('name', '!=', 'SUPER ADMIN')->get();
+        $kelasJurusan = KelasJurusan::select('kelas_jurusans.name as class_name', 'sekolahs.name as school_name')
+            ->join('sekolahs', 'kelas_jurusans.sekolah_id', '=', 'sekolahs.id')
+            ->where('kelas_jurusans.name', '!=', 'SUPER ADMIN')
+            ->distinct()
+            ->get();
+
+        $formattedKelasJurusan = $kelasJurusan->map(function ($item) {
+            return [
+                'class_school' => $item->class_name . ' - ' . $item->school_name
+            ];
+        });
 
         return response()->json([
-            'data' => $kelasJurusan
+            'data' => $formattedKelasJurusan
         ]);
     }
+
     public function getKelasJurusanLog()
     {
-        $kelasJurusan = KelasJurusan::distinct()->where('name', '!=', 'SUPER ADMIN')->where('sekolah_id', Auth::user()->sekolah_id)->get();
+        $sekolahId = Auth::user()->sekolah_id;
+
+        $kelasJurusan = DB::table('kelas_jurusans')
+            ->select('kelas_jurusans.*')
+            ->selectRaw('(SELECT COUNT(*) FROM users WHERE users.kelas_jurusan_id = kelas_jurusans.id AND users.sekolah_id = ?) as user_count', [$sekolahId])
+            ->distinct()
+            ->where('name', '!=', 'SUPER ADMIN')
+            ->where('sekolah_id', $sekolahId)
+            ->get();
+
+        $userPerKelas = User::where('sekolah_id', $sekolahId)->count();
+
         return response()->json([
-            'data' => $kelasJurusan
+            'data' => $kelasJurusan,
+            'jumlah_user' => $userPerKelas
         ]);
     }
+
+
     public function getSekolah()
     {
         $sekolah = Sekolah::where('name', '!=', 'SUPER ADMIN')->get();

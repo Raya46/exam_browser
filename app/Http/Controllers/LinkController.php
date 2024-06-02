@@ -8,6 +8,7 @@ use App\Models\Sekolah;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LinkController extends Controller
 {
@@ -110,5 +111,44 @@ class LinkController extends Controller
         return response()->json([
             'data' => 'success'
         ]);
+    }
+
+    public function streamIndex()
+    {
+        $response = new StreamedResponse(function (){
+            $userId = Auth::user()->id;
+            $sekolahId = Auth::user()->sekolah_id;
+            $kelasJurusanId = Auth::user()->kelas_jurusan_id;
+
+            while (true) {
+                $links = Link::where('sekolah_id', $sekolahId)
+                    ->where('kelas_jurusan_id', $kelasJurusanId)
+                    ->where(function ($query) use ($userId) {
+                        $query->whereDoesntHave('progress', function ($subQuery) use ($userId) {
+                            $subQuery->where('user_id', $userId);
+                        })
+                            ->orWhereHas('progress', function ($subQuery) use ($userId) {
+                                $subQuery->where('user_id', $userId)
+                                    ->where('status_progress', 'belum dikerjakan');
+                            });
+                    })
+                    ->get();
+
+                echo "data: " . json_encode(['data' => $links]) . "\n\n";
+                ob_flush();
+                flush();
+                sleep(5); // Wait for 5 seconds before sending the next update
+
+                if (connection_aborted()) {
+                    break;
+                }
+            }
+        });
+
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Cache-Control', 'no-cache');
+        $response->headers->set('Connection', 'keep-alive');
+
+        return $response;
     }
 }

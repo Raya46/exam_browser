@@ -68,7 +68,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-kelas/{id}', [KelasJurusanController::class, 'show']);
     Route::put('/update-kelas/{id}', [KelasJurusanController::class, 'updateKelasJurusan']);
     Route::delete('/delete-kelas/{id}', [KelasJurusanController::class, 'destroy']);
-    Route::get('/stream-monitoring-user-progress', [ProgressController::class, 'streamMonitoringUserProgress']);
-    Route::get('/stream-links', [LinkController::class, 'streamIndex']);
-    Route::get('/stream-user-progress', [ProgressController::class, 'streamUserProgress']);
 });

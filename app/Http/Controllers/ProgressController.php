@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProgressController extends Controller
 {
@@ -119,80 +118,5 @@ class ProgressController extends Controller
         return response()->json([
             'data' => $progress
         ]);
-    }
-
-    public function streamMonitoringUserProgress(Request $request)
-    {
-        $response = new StreamedResponse(function () use ($request) {
-            $lastEventId = $request->header('Last-Event-ID', 0);
-
-            while (true) {
-                $query = Progress::whereHas('user', function ($query) use ($request) {
-                    $query->where('role', 'siswa')
-                        ->where('sekolah_id', Auth::user()->sekolah_id);
-
-                    if ($request->filled('kelas_jurusan_id')) {
-                        $query->where('kelas_jurusan_id', $request->kelas_jurusan_id);
-                    }
-                })->with('link', 'user');
-
-                if ($request->filled('status_progress')) {
-                    $query->where('status_progress', $request->status_progress);
-                }
-
-                $data = $query->get();
-
-                echo "id: " . uniqid() . "\n";
-                echo "data: " . json_encode(['data' => $data]) . "\n\n";
-
-                ob_flush();
-                flush();
-
-                sleep(5); // Wait for 5 seconds before sending the next update
-
-                if (connection_aborted()) {
-                    break;
-                }
-            }
-        });
-
-        $response->headers->set('Content-Type', 'text/event-stream');
-        $response->headers->set('Cache-Control', 'no-cache');
-        $response->headers->set('Connection', 'keep-alive');
-
-        return $response;
-    }
-
-    public function streamUserProgress()
-    {
-        $response = new StreamedResponse(function () {
-            $userId = Auth::user()->id;
-
-            while (true) {
-                $data = Progress::whereHas('user', function ($query) use ($userId) {
-                    $query->where('role', 'siswa')
-                        ->where('sekolah_id', Auth::user()->sekolah_id)
-                        ->where('id', $userId)
-                        ->where('kelas_jurusan_id', Auth::user()->kelas_jurusan_id);
-                })->where('status_progress', '!=', 'belum dikerjakan')
-                    ->with('link', 'user')
-                    ->get();
-
-                echo "data: " . json_encode(['data' => $data]) . "\n\n";
-                ob_flush();
-                flush();
-                sleep(5); // Wait for 5 seconds before sending the next update
-
-                if (connection_aborted()) {
-                    break;
-                }
-            }
-        });
-
-        $response->headers->set('Content-Type', 'text/event-stream');
-        $response->headers->set('Cache-Control', 'no-cache');
-        $response->headers->set('Connection', 'keep-alive');
-
-        return $response;
     }
 }

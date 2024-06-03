@@ -264,6 +264,7 @@ class UserController extends Controller
             'password' => 'required|string',
             'sekolah' => 'required|string',
             'kelas_jurusan' => 'required|string',
+            'token' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -287,7 +288,8 @@ class UserController extends Controller
                 'role' => $request->role,
                 'password' => bcrypt($request->password),
                 'sekolah_id' => $sekolah->id,
-                'kelas_jurusan_id' => $kelasJurusan->id
+                'kelas_jurusan_id' => $kelasJurusan->id,
+                'token' => $request->token
             ]);
 
             return response()->json(['data' => 'success']);

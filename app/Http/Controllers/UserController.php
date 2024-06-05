@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProgressUpdated;
 use App\Exports\ExportSiswa;
 use App\Imports\ImportSiswa;
 use App\Models\KelasJurusan;
@@ -342,6 +343,7 @@ class UserController extends Controller
     public function getSekolah()
     {
         $sekolah = Sekolah::where('name', '!=', 'SUPER ADMIN')->get();
+        event(new ProgressUpdated($sekolah));
 
         return response()->json([
             'data' => $sekolah

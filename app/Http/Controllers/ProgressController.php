@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProgressUpdated;
 use App\Models\Link;
 use App\Models\Progress;
 use App\Models\User;
@@ -96,7 +97,6 @@ class ProgressController extends Controller
             }
         })->with('link', 'user');
 
-        // Tambahkan filter untuk status_progress
         if ($request->filled('status_progress')) {
             $query->where('status_progress', $request->status_progress);
         }
@@ -105,6 +105,9 @@ class ProgressController extends Controller
             'kelas_jurusan_id' => $request->kelas_jurusan_id,
             'status_progress' => $request->status_progress
         ]);
+
+        // Dispatch the event with the data
+        event(new ProgressUpdated($data));
 
         return response()->json([
             'data' => $data
@@ -118,5 +121,15 @@ class ProgressController extends Controller
         return response()->json([
             'data' => $progress
         ]);
+    }
+
+    public function authenticate(Request $request)
+    {
+        $user = Auth::user();
+        if ($user) {
+            return response()->json(['auth' => $user->id]);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
     }
 }

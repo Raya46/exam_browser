@@ -59,6 +59,11 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+    'broadcasting' => [
+        'default' => env('BROADCAST_DRIVER', 'pusher'),
+    ],
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -165,10 +170,10 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class
+        Maatwebsite\Excel\ExcelServiceProvider::class,
     ])->toArray(),
 
     /*

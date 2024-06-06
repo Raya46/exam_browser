@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ProgressUpdated;
 use App\Models\Link;
 use App\Models\Progress;
 use App\Models\User;
@@ -88,6 +87,10 @@ class ProgressController extends Controller
 
     public function monitoringUserProgress(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
         $query = Progress::whereHas('user', function ($query) use ($request) {
             $query->where('role', 'siswa')
                 ->where('sekolah_id', Auth::user()->sekolah_id);
@@ -106,13 +109,11 @@ class ProgressController extends Controller
             'status_progress' => $request->status_progress
         ]);
 
-        // Dispatch the event with the data
-        event(new ProgressUpdated($data));
-
         return response()->json([
             'data' => $data
         ]);
     }
+
 
     public function show($id)
     {
@@ -121,15 +122,5 @@ class ProgressController extends Controller
         return response()->json([
             'data' => $progress
         ]);
-    }
-
-    public function authenticate(Request $request)
-    {
-        $user = Auth::user();
-        if ($user) {
-            return response()->json(['auth' => $user->id]);
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
     }
 }

@@ -128,14 +128,14 @@ class UserController extends Controller
         $data = User::with('kelasJurusan')->whereIn('role', $role)
             ->where('sekolah_id', Auth::user()->sekolah_id)
             ->where('kelas_jurusan_id', $request->kelas_jurusan_id)
-            ->paginate(5)->appends([
+            ->paginate(4)->appends([
                 'kelas_jurusan_id' => $request->kelas_jurusan_id
             ]);
         $token = Auth::user()->token;
 
         if (empty($token)) {
             return response()->json([
-                'data' => []
+                'data' => 'not paid'
             ]);
         }
 
@@ -343,7 +343,6 @@ class UserController extends Controller
     public function getSekolah()
     {
         $sekolah = Sekolah::where('name', '!=', 'SUPER ADMIN')->get();
-        event(new ProgressUpdated($sekolah));
 
         return response()->json([
             'data' => $sekolah

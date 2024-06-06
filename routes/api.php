@@ -6,9 +6,7 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\KelasJurusanController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 Route::post('/login', [UserController::class, 'loginAdmin']);
 Route::post('/login-siswa', [UserController::class, 'loginSiswaAdmin']);
@@ -20,14 +18,6 @@ Route::put('/update-status', [ProgressController::class, 'updateStatusByTime']);
 Route::post('/pay/hook', [PayController::class, 'webhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/broadcasting/auth', function (Request $request) {
-        try {
-            return Broadcast::auth($request);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    });
-
     Route::post('/logout', [UserController::class, 'logout']);
     Route::post('/verify', [UserController::class, 'updateOrVerifySerialNumber']);
     Route::get('/get-data-login', [UserController::class, 'getDataLoggedIn']);
